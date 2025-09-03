@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Summarizer by Topic - Vibe</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            background-color: #fbfbfd;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --primary-blue: #007aff;
+            --secondary-gray: #86868b;
+            --light-gray: #f5f5f7;
+            --dark-gray: #1d1d1f;
+            --accent-purple: #d299c2;
+            --accent-yellow: #fef9d7;
+            --section-spacing: 120px;
+            --border-radius: 18px;
+            --transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+
+        .nav-back {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-back:hover {
+            transform: translateX(-4px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 20px 80px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-yellow) 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-icon {
+            font-size: 120px;
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: bounceIn 1.2s ease-out 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.6s forwards;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 400;
+            margin-bottom: 48px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            animation: slideInUp 1.2s ease-out 0.9s forwards;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Problem & Solution */
+        .problem-solution {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .ps-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--dark-gray);
+        }
+
+        .ps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .ps-content h3 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--dark-gray);
+        }
+
+        .ps-content p {
+            font-size: 18px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .ps-list {
+            list-style: none;
+        }
+
+        .ps-list li {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            padding: 8px 0;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .problem-list li:before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: #ff3b30;
+            font-weight: bold;
+        }
+
+        .solution-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #34c759;
+            font-weight: bold;
+        }
+
+        /* Core Features */
+        .core-features {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px 32px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark-gray);
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+        }
+
+        /* User Personas */
+        .personas {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .personas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .persona-card {
+            background: var(--light-gray);
+            padding: 32px;
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-yellow));
+        }
+
+        .persona-avatar {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .persona-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .persona-role {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            margin-bottom: 24px;
+        }
+
+        .persona-details {
+            font-size: 15px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+        }
+
+        /* Competitive Advantage */
+        .competitive-advantage {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .advantage-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .comparison-table {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-top: 60px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-yellow));
+            color: white;
+            padding: 24px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+
+        .feature-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .check {
+            text-align: center;
+            font-size: 20px;
+            color: #34c759;
+        }
+
+        .cross {
+            text-align: center;
+            font-size: 20px;
+            color: #ff3b30;
+        }
+
+        .partial {
+            text-align: center;
+            font-size: 20px;
+            color: #ff9500;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-yellow) 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .cta-description {
+            font-size: 20px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .cta-primary {
+            background: white;
+            color: var(--accent-purple);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 120px 20px 60px;
+            }
+
+            .ps-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .comparison-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            :root {
+                --section-spacing: 80px;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-back">← Back to Products</a>
+            <a href="index.html" class="nav-logo">Vibe</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-icon">🎯</div>
+            <h1 class="hero-title">Video Summarizer</h1>
+            <p class="hero-subtitle">Intelligent platform that discovers, curates, and summarizes the best-rated videos on any topic, saving you hours of content research and helping you focus on what matters most.</p>
+            
+            <div class="hero-stats animate-on-scroll">
+                <div class="stat-item">
+                    <span class="stat-number">70%</span>
+                    <span class="stat-label">Time Saved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">85%</span>
+                    <span class="stat-label">Quality Assurance</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">10x</span>
+                    <span class="stat-label">More Content</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2-3h</span>
+                    <span class="stat-label">Weekly Savings</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem & Solution -->
+    <section class="problem-solution">
+        <div class="ps-container">
+            <h2 class="section-title animate-on-scroll">The Content Overload Problem</h2>
+            
+            <div class="ps-grid">
+                <div class="ps-content animate-on-scroll">
+                    <h3>The Challenge</h3>
+                    <p>In today's content-saturated digital landscape, millions of videos are uploaded daily across platforms. Users struggle with:</p>
+                    <ul class="ps-list problem-list">
+                        <li>Overwhelming amount of content to sift through</li>
+                        <li>No quality assurance before time investment</li>
+                        <li>Difficulty finding relevant, high-value content</li>
+                        <li>Time wasted on poor-quality videos</li>
+                        <li>No efficient way to evaluate content quickly</li>
+                    </ul>
+                </div>
+
+                <div class="ps-content animate-on-scroll">
+                    <h3>Our Solution</h3>
+                    <p>Video Summarizer by Topic revolutionizes content discovery by providing:</p>
+                    <ul class="ps-list solution-list">
+                        <li>AI-powered curation of top-rated videos</li>
+                        <li>Quality filtering based on engagement metrics</li>
+                        <li>Concise summaries for quick decision making</li>
+                        <li>Personalized recommendations by topic</li>
+                        <li>Time-efficient content consumption</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features -->
+    <section class="core-features">
+        <div class="features-container">
+            <h2 class="section-title animate-on-scroll">Powerful Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🔍</span>
+                    <h3 class="feature-title">Intelligent Discovery</h3>
+                    <p class="feature-description">Advanced algorithms automatically identify trending, high-engagement videos across multiple platforms, filtering by quality metrics and user engagement.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📊</span>
+                    <h3 class="feature-title">Multi-Factor Ranking</h3>
+                    <p class="feature-description">Sophisticated ranking system considering views, ratings, comments, recency, and authority scores to surface only the highest-quality content.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🤖</span>
+                    <h3 class="feature-title">AI Summarization</h3>
+                    <p class="feature-description">Generate concise, accurate summaries using advanced natural language processing, highlighting key points and takeaways from each video.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">Topic-Based Curation</h3>
+                    <p class="feature-description">Personalized content feeds based on your specific interests and professional needs, ensuring relevant recommendations every time.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🔔</span>
+                    <h3 class="feature-title">Real-Time Updates</h3>
+                    <p class="feature-description">Continuous monitoring system with smart notifications keeps you updated on new high-quality content in your areas of interest.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">Multi-Platform Support</h3>
+                    <p class="feature-description">Access content from YouTube, Vimeo, TikTok, and more through a single, unified interface with consistent quality standards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Personas -->
+    <section class="personas">
+        <div class="personas-container">
+            <h2 class="section-title animate-on-scroll">Built for Modern Professionals</h2>
+            
+            <div class="personas-grid">
+                <div class="persona-card animate-on-scroll">
+                    <span class="persona-avatar">👩‍💼</span>
+                    <h3 class="persona-name">Sarah</h3>
+                    <p class="persona-role">The Efficient Learner</p>
+                    <p class="persona-details">Marketing manager who values high-quality, actionable insights for industry trends. Limited time for content consumption but needs to stay current with developments. Uses mobile device primarily and seeks quick, valuable updates.</p>
+                </div>
+
+                <div class="persona-card animate-on-scroll">
+                    <span class="persona-avatar">👨‍🎓</span>
+                    <h3 class="persona-name">Alex</h3>
+                    <p class="persona-role">The Research Student</p>
+                    <p class="persona-details">Graduate student requiring comprehensive topic coverage and credible source validation. Values detailed summaries and needs both mobile and desktop access for research projects and academic work.</p>
+                </div>
+
+                <div class="persona-card animate-on-scroll">
+                    <span class="persona-avatar">👨‍💻</span>
+                    <h3 class="persona-name">Michael</h3>
+                    <p class="persona-role">The Busy Professional</p>
+                    <p class="persona-details">Consultant seeking quick industry updates with maximum efficiency. Values time-saving features and flexible viewing options. Prefers notifications and alerts for staying informed without active searching.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Competitive Advantage -->
+    <section class="competitive-advantage">
+        <div class="advantage-container">
+            <h2 class="section-title animate-on-scroll">Why Choose Our Solution?</h2>
+            
+            <div class="comparison-table animate-on-scroll">
+                <div class="table-header">Feature Comparison</div>
+                <div class="comparison-row">
+                    <div class="feature-name">Feature</div>
+                    <div style="font-weight: 600;">Video Summarizer</div>
+                    <div style="font-weight: 600;">YouTube Trending</div>
+                    <div style="font-weight: 600;">Video Indexer</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">AI-Powered Summaries</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">Quality-Based Filtering</div>
+                    <div class="check">✓</div>
+                    <div class="partial">~</div>
+                    <div class="partial">~</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">Multi-Platform Support</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="partial">~</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">Personalized Recommendations</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">Topic-Focused Curation</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                    <div class="cross">✗</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="feature-name">Consumer-Friendly Interface</div>
+                    <div class="check">✓</div>
+                    <div class="check">✓</div>
+                    <div class="cross">✗</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Stop Wasting Time on Bad Content</h2>
+            <p class="cta-description">Join thousands of professionals who save 2-3 hours weekly by discovering only the highest-quality videos in their field of interest.</p>
+            <div class="cta-buttons">
+                <a href="#" class="cta-button cta-primary">Start Free Trial</a>
+                <a href="#" class="cta-button cta-secondary">See Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Stagger animations for feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.1}s`;
+        });
+
+        // Stagger animations for persona cards
+        const personaCards = document.querySelectorAll('.persona-card');
+        personaCards.forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.15}s`;
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            
+            function updateCounter() {
+                start += increment;
+                if (start < target) {
+                    element.textContent = Math.floor(start);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = target;
+                }
+            }
+            
+            updateCounter();
+        }
+
+        // Animate stats when they come into view
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.animated) {
+                    entry.target.dataset.animated = 'true';
+                    const number = entry.target.querySelector('.stat-number');
+                    const text = number.textContent;
+                    
+                    if (text.includes('%')) {
+                        const value = parseInt(text);
+                        number.textContent = '0%';
+                        animateCounter(number, value, 1500);
+                        setTimeout(() => {
+                            number.textContent = text;
+                        }, 1500);
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            statsObserver.observe(stat);
+        });
+
+        // Hover effects for feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(251, 251, 253, 0.95)';
+            } else {
+                nav.style.background = 'rgba(251, 251, 253, 0.8)';
+            }
+        });
+    </script>
+</body>
+</html>

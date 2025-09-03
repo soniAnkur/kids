@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning App - Vibe</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            background-color: #fbfbfd;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --primary-blue: #007aff;
+            --secondary-gray: #86868b;
+            --light-gray: #f5f5f7;
+            --dark-gray: #1d1d1f;
+            --accent-pink: #ff9a9e;
+            --section-spacing: 120px;
+            --border-radius: 18px;
+            --transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+
+        .nav-back {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-back:hover {
+            transform: translateX(-4px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 20px 80px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-icon {
+            font-size: 120px;
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: bounceIn 1.2s ease-out 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.6s forwards;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 400;
+            margin-bottom: 48px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            animation: slideInUp 1.2s ease-out 0.9s forwards;
+        }
+
+        /* Key Features Grid */
+        .key-features {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--dark-gray);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 40px 32px;
+            text-align: center;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark-gray);
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.5;
+        }
+
+        /* Technical Specs */
+        .tech-specs {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .specs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .spec-item {
+            background: white;
+            padding: 32px 24px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-pink);
+        }
+
+        .spec-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 12px;
+        }
+
+        .spec-description {
+            font-size: 15px;
+            color: var(--secondary-gray);
+            line-height: 1.5;
+        }
+
+        /* User Stories */
+        .user-stories {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .stories-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .story-item {
+            background: var(--light-gray);
+            padding: 32px;
+            border-radius: var(--border-radius);
+            margin-bottom: 24px;
+            border-left: 4px solid var(--accent-pink);
+        }
+
+        .story-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 16px;
+        }
+
+        .story-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .acceptance-criteria {
+            list-style: none;
+        }
+
+        .acceptance-criteria li {
+            font-size: 14px;
+            color: var(--secondary-gray);
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .acceptance-criteria li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-pink);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, #fecfef 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .cta-description {
+            font-size: 20px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .cta-primary {
+            background: white;
+            color: var(--accent-pink);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 120px 20px 60px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            :root {
+                --section-spacing: 80px;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-back">← Back to Products</a>
+            <a href="index.html" class="nav-logo">Vibe</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-icon">🎨</div>
+            <h1 class="hero-title">Kids Learning App</h1>
+            <p class="hero-subtitle">AI-powered storytelling platform that creates personalized educational stories with custom illustrations, adapting to each child's unique learning journey and interests.</p>
+        </div>
+    </section>
+
+    <!-- Key Features -->
+    <section class="key-features">
+        <div class="features-container">
+            <h2 class="section-title animate-on-scroll">Revolutionary Learning Experience</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🤖</span>
+                    <h3 class="feature-title">AI Story Generation</h3>
+                    <p class="feature-description">Dynamic creation of educational narratives based on selected subjects, moral lessons, and age appropriateness, ensuring every story is unique and engaging.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🎭</span>
+                    <h3 class="feature-title">Custom Illustrations</h3>
+                    <p class="feature-description">Text-to-image AI integration creates personalized storybook illustrations that bring each narrative to life with stunning visual consistency.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📈</span>
+                    <h3 class="feature-title">Adaptive Learning</h3>
+                    <p class="feature-description">Content complexity automatically adjusts based on user profile and performance, ensuring appropriate challenge levels for optimal learning outcomes.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🎤</span>
+                    <h3 class="feature-title">Voice Narration</h3>
+                    <p class="feature-description">Professional text-to-speech integration with child-friendly voices, customizable speed control, and natural storytelling intonation.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📊</span>
+                    <h3 class="feature-title">Progress Tracking</h3>
+                    <p class="feature-description">Comprehensive analytics for parents and educators, tracking learning progress, story preferences, and educational milestone achievements.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🎮</span>
+                    <h3 class="feature-title">Interactive Elements</h3>
+                    <p class="feature-description">Touch-based interactions, voice commands, and gamified learning elements that keep children engaged throughout their educational journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Specifications -->
+    <section class="tech-specs">
+        <div class="specs-container">
+            <h2 class="section-title animate-on-scroll">Technical Excellence</h2>
+            
+            <div class="specs-grid">
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">AI Integration</h3>
+                    <p class="spec-description">Powered by GPT-4 for story generation and DALL-E 3 for custom illustrations, ensuring high-quality, contextually appropriate content.</p>
+                </div>
+
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">Cross-Platform</h3>
+                    <p class="spec-description">React Native framework supporting iOS 13+ and Android 7+, with feature parity across all devices and screen sizes.</p>
+                </div>
+
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">Performance</h3>
+                    <p class="spec-description">Stories load within 30 seconds, images within 10 seconds each, with offline capability for previously accessed content.</p>
+                </div>
+
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">Security</h3>
+                    <p class="spec-description">COPPA compliant with AES-256 encryption, parental controls, and privacy-by-design architecture protecting children's data.</p>
+                </div>
+
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">Accessibility</h3>
+                    <p class="spec-description">WCAG 2.1 AA compliant with screen reader support, high contrast mode, adjustable font sizes, and motor accessibility features.</p>
+                </div>
+
+                <div class="spec-item animate-on-scroll">
+                    <h3 class="spec-title">Content Safety</h3>
+                    <p class="spec-description">Multi-layered content filtering with AI and human moderation, ensuring 99.9% appropriate content delivery for children.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Stories -->
+    <section class="user-stories">
+        <div class="stories-container">
+            <h2 class="section-title animate-on-scroll">Designed for Real Families</h2>
+
+            <div class="story-item animate-on-scroll">
+                <h3 class="story-title">Personalized Story Experience</h3>
+                <p class="story-description">As a parent, I want AI to generate stories based on my child's interests so that they stay engaged with learning content.</p>
+                <ul class="acceptance-criteria">
+                    <li>Parent can select from 20+ interest categories (animals, space, history, etc.)</li>
+                    <li>AI generates unique stories within 30 seconds</li>
+                    <li>Stories include educational elements relevant to selected interests</li>
+                    <li>Content appropriateness maintained for selected age group</li>
+                    <li>Stories are 5-15 minutes in length depending on age setting</li>
+                </ul>
+            </div>
+
+            <div class="story-item animate-on-scroll">
+                <h3 class="story-title">Visual Learning Enhancement</h3>
+                <p class="story-description">As a child, I want to see beautiful pictures that match the story so that I can better understand and enjoy the content.</p>
+                <ul class="acceptance-criteria">
+                    <li>Each story includes 8-12 custom AI-generated illustrations</li>
+                    <li>Images are generated within 45 seconds per illustration</li>
+                    <li>Visual style remains consistent throughout each story</li>
+                    <li>Images are safe and appropriate for children</li>
+                    <li>Images support and enhance story comprehension</li>
+                </ul>
+            </div>
+
+            <div class="story-item animate-on-scroll">
+                <h3 class="story-title">Adaptive Difficulty</h3>
+                <p class="story-description">As a parent, I want the app to adjust difficulty based on my child's performance so that they are appropriately challenged.</p>
+                <ul class="acceptance-criteria">
+                    <li>System tracks quiz performance and reading comprehension</li>
+                    <li>Content difficulty adjusts automatically after every 3 stories</li>
+                    <li>Parents can manually override difficulty settings</li>
+                    <li>Vocabulary and concept complexity scales appropriately</li>
+                    <li>Learning progress is visually represented in dashboard</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Ready to Transform Learning?</h2>
+            <p class="cta-description">Join thousands of families already using our AI-powered platform to create magical, educational experiences that grow with their children.</p>
+            <div class="cta-buttons">
+                <a href="#" class="cta-button cta-primary">Start Free Trial</a>
+                <a href="#" class="cta-button cta-secondary">Watch Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Stagger animations for feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.1}s`;
+        });
+
+        // Stagger animations for spec items
+        const specItems = document.querySelectorAll('.spec-item');
+        specItems.forEach((item, index) => {
+            item.style.transitionDelay = `${index * 0.05}s`;
+        });
+
+        // Smooth hover effects
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(251, 251, 253, 0.95)';
+            } else {
+                nav.style.background = 'rgba(251, 251, 253, 0.8)';
+            }
+        });
+    </script>
+</body>
+</html>

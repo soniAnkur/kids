@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Channel Summarizer - Vibe</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            background-color: #fbfbfd;
+            overflow-x: hidden;
+        }
+
+        :root {
+            --primary-blue: #007aff;
+            --secondary-gray: #86868b;
+            --light-gray: #f5f5f7;
+            --dark-gray: #1d1d1f;
+            --accent-blue: #89f7fe;
+            --accent-purple: #66a6ff;
+            --section-spacing: 120px;
+            --border-radius: 18px;
+            --transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+
+        .nav-back {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-back:hover {
+            transform: translateX(-4px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 20px 80px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-icon {
+            font-size: 120px;
+            margin-bottom: 32px;
+            opacity: 0;
+            animation: bounceIn 1.2s ease-out 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.6s forwards;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 400;
+            margin-bottom: 48px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            animation: slideInUp 1.2s ease-out 0.9s forwards;
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-number {
+            font-size: 36px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Workflow Section */
+        .workflow {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .workflow-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--dark-gray);
+        }
+
+        .workflow-steps {
+            position: relative;
+            margin-top: 60px;
+        }
+
+        .workflow-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .workflow-step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .step-content {
+            flex: 1;
+            background: var(--light-gray);
+            padding: 32px;
+            border-radius: var(--border-radius);
+            margin: 0 40px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: var(--transition);
+        }
+
+        .workflow-step:nth-child(even) .step-content {
+            transform: translateX(50px);
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(102, 166, 255, 0.3);
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 12px;
+        }
+
+        .step-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+        }
+
+        /* Features Grid */
+        .features {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px 32px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            border-top: 4px solid transparent;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card:nth-child(odd) {
+            border-top-color: var(--accent-blue);
+        }
+
+        .feature-card:nth-child(even) {
+            border-top-color: var(--accent-purple);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark-gray);
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.6;
+        }
+
+        /* Technical Stack */
+        .tech-stack {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .tech-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .tech-category {
+            padding: 24px;
+            border-radius: var(--border-radius);
+            background: var(--light-gray);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .tech-category:nth-child(even) {
+            border-left-color: var(--accent-purple);
+        }
+
+        .tech-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 16px;
+        }
+
+        .tech-list {
+            list-style: none;
+        }
+
+        .tech-list li {
+            font-size: 15px;
+            color: var(--secondary-gray);
+            padding: 4px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .tech-list li:before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+        }
+
+        /* Pricing Tiers */
+        .pricing {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .pricing-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 40px 32px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            position: relative;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent-purple);
+            transform: scale(1.05);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-purple);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pricing-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark-gray);
+        }
+
+        .pricing-price {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .pricing-period {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            margin-bottom: 32px;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            font-size: 16px;
+            color: var(--secondary-gray);
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .pricing-features li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        .pricing-button {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pricing-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 166, 255, 0.4);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .cta-description {
+            font-size: 20px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .cta-primary {
+            background: white;
+            color: var(--accent-purple);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 120px 20px 60px;
+            }
+
+            .workflow-line {
+                display: none;
+            }
+
+            .workflow-step {
+                flex-direction: column !important;
+                text-align: center;
+            }
+
+            .step-content {
+                margin: 0 !important;
+                transform: translateY(30px) !important;
+            }
+
+            .step-number {
+                margin-bottom: 24px;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            :root {
+                --section-spacing: 80px;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-back">← Back to Products</a>
+            <a href="index.html" class="nav-logo">Vibe</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-icon">📺</div>
+            <h1 class="hero-title">Channel Summarizer</h1>
+            <p class="hero-subtitle">Automated monitoring and summarization of your favorite YouTube channels, delivering key insights without the time commitment. Never miss important updates again.</p>
+            
+            <div class="hero-metrics animate-on-scroll">
+                <div class="metric-item">
+                    <span class="metric-number">10x</span>
+                    <span class="metric-label">More Content</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-number">30min</span>
+                    <span class="metric-label">Max Processing</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-number">70%</span>
+                    <span class="metric-label">MAU Rate</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-number">50</span>
+                    <span class="metric-label">Channels Max</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow -->
+    <section class="workflow">
+        <div class="workflow-container">
+            <h2 class="section-title animate-on-scroll">Set and Forget Automation</h2>
+            
+            <div class="workflow-steps">
+                <div class="workflow-line"></div>
+                
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">Subscribe to Channels</h3>
+                        <p class="step-description">Add your favorite YouTube channels by URL or search. Our system validates and begins monitoring them immediately, tracking up to 50 channels on premium plans.</p>
+                    </div>
+                    <div class="step-number">1</div>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">Real-time Detection</h3>
+                        <p class="step-description">Advanced monitoring system detects new video uploads within 15 minutes using YouTube webhooks and intelligent polling, ensuring you never miss important content.</p>
+                    </div>
+                    <div class="step-number">2</div>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">AI Transcription</h3>
+                        <p class="step-description">High-accuracy speech-to-text processing using OpenAI Whisper and Google Cloud, achieving >95% accuracy for clear audio with automatic quality enhancement.</p>
+                    </div>
+                    <div class="step-number">3</div>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">Smart Summarization</h3>
+                        <p class="step-description">GPT-4 powered analysis extracts key points, insights, and takeaways, generating concise summaries in multiple formats (bullets, paragraphs, highlights).</p>
+                    </div>
+                    <div class="step-number">4</div>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">Instant Notifications</h3>
+                        <p class="step-description">Customizable alerts via email, push notifications, or in-app messages with smart timing options and quiet hours to fit your schedule perfectly.</p>
+                    </div>
+                    <div class="step-number">5</div>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-content animate-on-scroll">
+                        <h3 class="step-title">Searchable Archive</h3>
+                        <p class="step-description">All summaries become part of your personal knowledge base with full-text search, tagging, and organization features for future reference and research.</p>
+                    </div>
+                    <div class="step-number">6</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="features-container">
+            <h2 class="section-title animate-on-scroll">Powerful Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🔄</span>
+                    <h3 class="feature-title">Automated Monitoring</h3>
+                    <p class="feature-description">Set-and-forget channel monitoring with real-time video detection using YouTube webhooks and intelligent polling systems for maximum reliability.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">High Accuracy Transcription</h3>
+                    <p class="feature-description">Advanced speech-to-text technology achieving >95% accuracy with automatic audio enhancement and multiple language support for global content.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🤖</span>
+                    <h3 class="feature-title">AI-Powered Summaries</h3>
+                    <p class="feature-description">GPT-4 integration delivers contextual summaries with key insights, actionable takeaways, and customizable length and format options.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">Smart Notifications</h3>
+                    <p class="feature-description">Flexible notification system with email digests, push alerts, and in-app messages, plus quiet hours and frequency controls for optimal user experience.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">🔍</span>
+                    <h3 class="feature-title">Advanced Search</h3>
+                    <p class="feature-description">Full-text search across all historical summaries with filtering by date, channel, topic, and custom tags for instant knowledge retrieval.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <span class="feature-icon">📊</span>
+                    <h3 class="feature-title">Analytics Dashboard</h3>
+                    <p class="feature-description">Comprehensive insights into your content consumption patterns, channel performance, and learning progress with exportable reports.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Stack -->
+    <section class="tech-stack">
+        <div class="tech-container">
+            <h2 class="section-title animate-on-scroll">Built with Modern Technology</h2>
+            
+            <div class="tech-grid">
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">Frontend</h3>
+                    <ul class="tech-list">
+                        <li>React 18 with TypeScript</li>
+                        <li>Progressive Web App (PWA)</li>
+                        <li>Tailwind CSS Styling</li>
+                        <li>React Query State Management</li>
+                    </ul>
+                </div>
+
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">Backend</h3>
+                    <ul class="tech-list">
+                        <li>Node.js with Express</li>
+                        <li>PostgreSQL Database</li>
+                        <li>Redis Caching Layer</li>
+                        <li>Bull Queue Processing</li>
+                    </ul>
+                </div>
+
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">AI Services</h3>
+                    <ul class="tech-list">
+                        <li>OpenAI Whisper API</li>
+                        <li>GPT-4 Turbo Summarization</li>
+                        <li>Google Cloud Speech-to-Text</li>
+                        <li>Natural Language Processing</li>
+                    </ul>
+                </div>
+
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">Infrastructure</h3>
+                    <ul class="tech-list">
+                        <li>AWS Cloud Platform</li>
+                        <li>Auto-scaling Architecture</li>
+                        <li>Global CDN Distribution</li>
+                        <li>Comprehensive Monitoring</li>
+                    </ul>
+                </div>
+
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">Security</h3>
+                    <ul class="tech-list">
+                        <li>OAuth 2.0 Authentication</li>
+                        <li>End-to-end Encryption</li>
+                        <li>GDPR Compliance</li>
+                        <li>Regular Security Audits</li>
+                    </ul>
+                </div>
+
+                <div class="tech-category animate-on-scroll">
+                    <h3 class="tech-title">Integrations</h3>
+                    <ul class="tech-list">
+                        <li>YouTube Data API v3</li>
+                        <li>Notion API Integration</li>
+                        <li>Zapier Automation</li>
+                        <li>Email & Push Services</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing">
+        <div class="pricing-container">
+            <h2 class="section-title animate-on-scroll">Choose Your Plan</h2>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card animate-on-scroll">
+                    <h3 class="pricing-title">Starter</h3>
+                    <div class="pricing-price">Free</div>
+                    <div class="pricing-period">7-day trial</div>
+                    <ul class="pricing-features">
+                        <li>5 channel subscriptions</li>
+                        <li>Email notifications only</li>
+                        <li>Basic summary format</li>
+                        <li>7-day content retention</li>
+                        <li>Community support</li>
+                    </ul>
+                    <button class="pricing-button">Start Free Trial</button>
+                </div>
+
+                <div class="pricing-card featured animate-on-scroll">
+                    <div class="pricing-badge">Most Popular</div>
+                    <h3 class="pricing-title">Professional</h3>
+                    <div class="pricing-price">$9.99</div>
+                    <div class="pricing-period">per month</div>
+                    <ul class="pricing-features">
+                        <li>50 channel subscriptions</li>
+                        <li>All notification types</li>
+                        <li>Multiple summary formats</li>
+                        <li>Unlimited content retention</li>
+                        <li>Advanced search & filtering</li>
+                        <li>Notion integration</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <button class="pricing-button">Upgrade to Pro</button>
+                </div>
+
+                <div class="pricing-card animate-on-scroll">
+                    <h3 class="pricing-title">Enterprise</h3>
+                    <div class="pricing-price">$29.99</div>
+                    <div class="pricing-period">per month</div>
+                    <ul class="pricing-features">
+                        <li>Unlimited channels</li>
+                        <li>Team collaboration</li>
+                        <li>Custom integrations</li>
+                        <li>Advanced analytics</li>
+                        <li>API access</li>
+                        <li>White-label options</li>
+                        <li>Dedicated support</li>
+                    </ul>
+                    <button class="pricing-button">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Never Miss Important Content Again</h2>
+            <p class="cta-description">Join thousands of professionals who consume 10x more high-quality content by automating their YouTube channel monitoring and summarization.</p>
+            <div class="cta-buttons">
+                <a href="#" class="cta-button cta-primary">Start Free Trial</a>
+                <a href="#" class="cta-button cta-secondary">Watch Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Specific animations for workflow steps
+        const workflowSteps = document.querySelectorAll('.step-content');
+        workflowSteps.forEach((step, index) => {
+            step.style.transitionDelay = `${index * 0.2}s`;
+        });
+
+        // Stagger animations for feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.1}s`;
+        });
+
+        // Stagger animations for tech categories
+        const techCategories = document.querySelectorAll('.tech-category');
+        techCategories.forEach((category, index) => {
+            category.style.transitionDelay = `${index * 0.05}s`;
+        });
+
+        // Enhanced hover effects for pricing cards
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('featured')) {
+                    this.style.transform = 'translateY(-12px) scale(1.02)';
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('featured')) {
+                    this.style.transform = 'translateY(0) scale(1)';
+                }
+            });
+        });
+
+        // Workflow step animations on scroll
+        const workflowObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateX(0)';
+                }
+            });
+        }, { threshold: 0.3 });
+
+        workflowSteps.forEach(step => {
+            workflowObserver.observe(step);
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(251, 251, 253, 0.95)';
+            } else {
+                nav.style.background = 'rgba(251, 251, 253, 0.8)';
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

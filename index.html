@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe - Next Generation Digital Experiences</title>
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Typography - Apple-inspired */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            background-color: #fbfbfd;
+            overflow-x: hidden;
+        }
+
+        /* Custom Properties */
+        :root {
+            --primary-blue: #007aff;
+            --secondary-gray: #86868b;
+            --light-gray: #f5f5f7;
+            --dark-gray: #1d1d1f;
+            --section-spacing: 120px;
+            --border-radius: 18px;
+            --transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 20px var(--section-spacing);
+            text-align: center;
+            background: linear-gradient(135deg, #fbfbfd 0%, #f5f5f7 100%);
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.3s forwards;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(20px, 3vw, 28px);
+            font-weight: 400;
+            color: var(--secondary-gray);
+            margin-bottom: 48px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.6s forwards;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            padding: 16px 32px;
+            background: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 18px;
+            transition: var(--transition);
+            opacity: 0;
+            animation: slideInUp 1.2s ease-out 0.9s forwards;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 122, 255, 0.4);
+        }
+
+        /* Product Grid */
+        .products {
+            padding: var(--section-spacing) 20px;
+            background: white;
+        }
+
+        .products-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-description {
+            font-size: 20px;
+            color: var(--secondary-gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .product-card {
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .product-image {
+            height: 240px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            color: white;
+        }
+
+        .product-image.kids-learning {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .product-image.storybooks {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .product-image.video-summarizer {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+        }
+
+        .product-image.youtube-summarizer {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+        }
+
+        .product-content {
+            padding: 32px;
+        }
+
+        .product-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .product-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .product-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .product-features li {
+            font-size: 14px;
+            color: var(--secondary-gray);
+            padding: 4px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .product-features li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        .product-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .product-link:hover {
+            transform: translateX(4px);
+        }
+
+        .product-link::after {
+            content: '→';
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--section-spacing) 20px;
+            background: var(--light-gray);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 48px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 20px;
+            background: var(--dark-gray);
+            color: white;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .footer-description {
+            font-size: 16px;
+            color: var(--secondary-gray);
+            margin-bottom: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .footer-copyright {
+            font-size: 14px;
+            color: var(--secondary-gray);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 20px 80px;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            :root {
+                --section-spacing: 80px;
+            }
+        }
+
+        /* Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">Vibe</a>
+            <ul class="nav-links">
+                <li><a href="#products">Products</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1 class="hero-title">Think different.<br>Learn smarter.</h1>
+            <p class="hero-subtitle">Discover the future of digital experiences with our innovative suite of AI-powered applications designed to transform how you learn, create, and consume content.</p>
+            <a href="#products" class="hero-cta">Explore Products</a>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="products-container">
+            <div class="section-header animate-on-scroll">
+                <h2 class="section-title">Revolutionary Products</h2>
+                <p class="section-description">Four groundbreaking applications that redefine digital interaction, learning, and content consumption through the power of artificial intelligence.</p>
+            </div>
+
+            <div class="product-grid">
+                <!-- Kids Learning App -->
+                <div class="product-card animate-on-scroll">
+                    <div class="product-image kids-learning">
+                        🎨
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-title">Kids Learning App</h3>
+                        <p class="product-description">AI-powered storytelling platform that creates personalized educational stories with custom illustrations, adapting to each child's learning journey.</p>
+                        <ul class="product-features">
+                            <li>Personalized AI-generated stories</li>
+                            <li>Custom visual illustrations</li>
+                            <li>Adaptive learning system</li>
+                            <li>Progress tracking for parents</li>
+                            <li>Interactive voice narration</li>
+                        </ul>
+                        <a href="kids-learning-app.html" class="product-link">Learn more</a>
+                    </div>
+                </div>
+
+                <!-- Kids Personalized Storybooks -->
+                <div class="product-card animate-on-scroll">
+                    <div class="product-image storybooks">
+                        📚
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-title">Personalized Storybooks</h3>
+                        <p class="product-description">Custom digital and print storybooks where children become the main characters, featuring their likeness in beautifully illustrated adventures.</p>
+                        <ul class="product-features">
+                            <li>Child as main character</li>
+                            <li>AI-generated custom artwork</li>
+                            <li>Print-on-demand books</li>
+                            <li>Educational story themes</li>
+                            <li>Family bonding experiences</li>
+                        </ul>
+                        <a href="kids-storybooks.html" class="product-link">Learn more</a>
+                    </div>
+                </div>
+
+                <!-- Video Summarizer by Topic -->
+                <div class="product-card animate-on-scroll">
+                    <div class="product-image video-summarizer">
+                        🎯
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-title">Video Summarizer</h3>
+                        <p class="product-description">Intelligent platform that discovers, curates, and summarizes the best-rated videos on any topic, saving you hours of content research.</p>
+                        <ul class="product-features">
+                            <li>AI-powered video discovery</li>
+                            <li>Quality-based ranking system</li>
+                            <li>Concise video summaries</li>
+                            <li>Personalized recommendations</li>
+                            <li>Multi-platform support</li>
+                        </ul>
+                        <a href="video-summarizer.html" class="product-link">Learn more</a>
+                    </div>
+                </div>
+
+                <!-- YouTube Channel Summarizer -->
+                <div class="product-card animate-on-scroll">
+                    <div class="product-image youtube-summarizer">
+                        📺
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-title">Channel Summarizer</h3>
+                        <p class="product-description">Automated monitoring and summarization of your favorite YouTube channels, delivering key insights without the time commitment.</p>
+                        <ul class="product-features">
+                            <li>Automated channel monitoring</li>
+                            <li>Real-time transcription</li>
+                            <li>AI-powered summaries</li>
+                            <li>Smart notifications</li>
+                            <li>Searchable content archive</li>
+                        </ul>
+                        <a href="youtube-summarizer.html" class="product-link">Learn more</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header animate-on-scroll">
+                <h2 class="section-title">Why Choose Vibe?</h2>
+                <p class="section-description">Our commitment to innovation, quality, and user experience sets us apart in the digital landscape.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">AI-Powered Innovation</h3>
+                    <p class="feature-description">Cutting-edge artificial intelligence drives every aspect of our products, delivering personalized experiences that adapt and evolve with users.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Precision & Quality</h3>
+                    <p class="feature-description">Meticulously crafted algorithms ensure high-quality results, from story generation to content summarization, maintaining excellence at scale.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Privacy First</h3>
+                    <p class="feature-description">Built with privacy by design, our platforms protect user data with enterprise-grade security and complete compliance with global privacy standards.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Lightning Fast</h3>
+                    <p class="feature-description">Optimized performance ensures instant responses and seamless experiences across all devices, from mobile phones to desktop computers.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">🌍</div>
+                    <h3 class="feature-title">Global Accessibility</h3>
+                    <p class="feature-description">Designed for universal access with support for multiple languages, accessibility standards, and responsive design for all screen sizes.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Continuous Innovation</h3>
+                    <p class="feature-description">Regular updates and feature enhancements keep our products at the forefront of technology, always evolving to meet user needs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-logo">Vibe</div>
+            <p class="footer-description">Transforming digital experiences through intelligent design and artificial intelligence. The future of content creation and consumption starts here.</p>
+            <div class="footer-links">
+                <a href="#products">Products</a>
+                <a href="#features">Features</a>
+                <a href="#about">About Us</a>
+                <a href="#support">Support</a>
+                <a href="#privacy">Privacy</a>
+                <a href="#terms">Terms</a>
+            </div>
+            <div class="footer-copyright">
+                © 2025 Vibe. All rights reserved. Designed with ❤️ for the next generation of digital experiences.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements with animate-on-scroll class
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Animate product cards with staggered delay
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // Animate feature items with staggered delay
+        const featureItems = document.querySelectorAll('.feature-item');
+        featureItems.forEach((item, index) => {
+            item.style.transitionDelay = `${index * 0.1}s`;
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(251, 251, 253, 0.95)';
+            } else {
+                nav.style.background = 'rgba(251, 251, 253, 0.8)';
+            }
+        });
+
+        // Parallax effect for hero section (subtle)
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            const rate = scrolled * -0.5;
+            hero.style.transform = `translateY(${rate}px)`;
+        });
+
+        // Add hover effects for better interactivity
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+                this.style.boxShadow = '0 40px 80px rgba(0, 0, 0, 0.15)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add typing effect to hero title (subtle enhancement)
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            function typing() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typing, speed);
+                }
+            }
+            typing();
+        }
+
+        // Initialize typing effect after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const heroTitle = document.querySelector('.hero-title');
+                const originalText = heroTitle.textContent;
+                typeWriter(heroTitle, originalText, 50);
+            }, 1000);
+        });
+
+        // Add dynamic gradient backgrounds to product cards
+        const gradients = [
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+            'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
+        ];
+
+        document.querySelectorAll('.product-image').forEach((image, index) => {
+            image.addEventListener('mouseenter', function() {
+                this.style.background = gradients[index % gradients.length];
+                this.style.transform = 'scale(1.05)';
+            });
+
+            image.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Performance optimization: Debounce scroll events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Apply debouncing to scroll-heavy operations
+        const debouncedScrollHandler = debounce(() => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(251, 251, 253, 0.95)';
+            } else {
+                nav.style.background = 'rgba(251, 251, 253, 0.8)';
+            }
+        }, 10);
+
+        window.addEventListener('scroll', debouncedScrollHandler);
+    </script>
+</body>
+</html>

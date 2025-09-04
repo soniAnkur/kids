@@ -1,28 +1,69 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Child, Story } from '@/types'
-import { mockStories } from '@/data/mock-data'
 import { formatRelativeTime, getInitials } from '@/lib/utils'
 import { StoryReader } from './StoryReader'
+import { getAllStories } from '@/actions/story-actions'
+import { onStoryGenerated } from '@/lib/story-events'
 
 interface StoryLibraryProps {
-  children: Child[]
+  childrenData: Child[]
   onBack: () => void
   onCreateStory: () => void
 }
 
-export function StoryLibrary({ children, onBack, onCreateStory }: StoryLibraryProps) {
+export function StoryLibrary({ childrenData, onBack, onCreateStory }: StoryLibraryProps) {
   const [selectedChildId, setSelectedChildId] = useState<string | 'all'>('all')
   const [selectedStory, setSelectedStory] = useState<Story | null>(null)
+  const [stories, setStories] = useState<Story[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  // Load stories on component mount
+  useEffect(() => {
+    async function loadStories() {
+      try {
+        setLoading(true)
+        const allStories = await getAllStories()
+        setStories(allStories)
+      } catch (error) {
+        console.error('Failed to load stories:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadStories()
+  }, [])
+
+  // Listen for new story generations
+  useEffect(() => {
+    const unsubscribe = onStoryGenerated((newStory) => {
+      setStories(prevStories => {
+        // Check if story already exists
+        const existingIndex = prevStories.findIndex(s => s.id === newStory.id)
+        if (existingIndex >= 0) {
+          // Update existing story
+          const updatedStories = [...prevStories]
+          updatedStories[existingIndex] = newStory
+          return updatedStories
+        } else {
+          // Add new story
+          return [newStory, ...prevStories]
+        }
+      })
+    })
+    
+    return unsubscribe
+  }, [])
   
   // Filter stories based on selected child
   const filteredStories = selectedChildId === 'all' 
-    ? mockStories 
-    : mockStories.filter(story => story.childId === selectedChildId)
+    ? stories 
+    : stories.filter(story => story.childId === selectedChildId)
   
   const getChildById = (childId: string) => {
-    return children.find(child => child.id === childId)
+    return childrenData.find(child => child.id === childId)
   }
 
   // Show story reader if a story is selected
@@ -90,7 +131,7 @@ export function StoryLibrary({ children, onBack, onCreateStory }: StoryLibraryPr
             >
               All
             </button>
-            {children.map((child) => (
+            {childrenData.map((child) => (
               <button
                 key={child.id}
                 onClick={() => setSelectedChildId(child.id)}
@@ -117,8 +158,13 @@ export function StoryLibrary({ children, onBack, onCreateStory }: StoryLibraryPr
           </div>
         </div>
 
-        {/* Stories grid */}
-        {filteredStories.length > 0 ? (
+        {/* Loading state */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent animate-spin rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading stories...</p>
+          </div>
+        ) : filteredStories.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredStories.map((story) => {
               const child = getChildById(story.childId)
@@ -180,7 +226,7 @@ export function StoryLibrary({ children, onBack, onCreateStory }: StoryLibraryPr
               <div className="w-8 h-8 bg-gray-400"></div>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {selectedChildId === 'all' ? 'No stories' : `No stories for ${children.find(c => c.id === selectedChildId)?.name}`}
+              {selectedChildId === 'all' ? 'No stories' : `No stories for ${childrenData.find(c => c.id === selectedChildId)?.name}`}
             </h3>
             <p className="text-gray-600 mb-6">
               Create your first story to get started

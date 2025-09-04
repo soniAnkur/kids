@@ -8,14 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { Plus } from 'lucide-react'
 
 interface ChildSelectorProps {
-  children: Child[]
+  childrenData: Child[]
   selectedChild: Child | null
   onSelectChild: (child: Child) => void
   onAddChild: () => void
 }
 
 export function ChildSelector({
-  children,
+  childrenData,
   selectedChild,
   onSelectChild,
   onAddChild
@@ -23,7 +23,7 @@ export function ChildSelector({
   return (
     <div className="flex space-x-3 overflow-x-auto pb-2">
       {/* Existing children */}
-      {children.map((child) => (
+      {childrenData.map((child) => (
         <Button
           key={child.id}
           onClick={() => onSelectChild(child)}

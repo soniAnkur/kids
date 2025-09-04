@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { ReactNode } from 'react'
 import { Child, User, ChatMessage, Story, StoryRequest } from '@/types'
 import { ChatHeader } from './ChatHeader'
 import { ChatMessageBubble } from './ChatMessageBubble'
@@ -12,6 +13,7 @@ import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { generateId, delay } from '@/lib/utils'
 import { sendChatMessage, getInitialChatMessage, requestStoryGeneration, checkStoryGenerationStatus } from '@/actions/chat-actions'
+import { generateStreamingStory } from '@/actions/stream-story-optimized'
 import { getStoryThemes } from '@/actions/story-actions'
 import { onStoryGenerated } from '@/lib/story-events'
 
@@ -30,6 +32,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showStoryReader, setShowStoryReader] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [streamingStory, setStreamingStory] = useState<ReactNode | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -93,6 +96,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+
   const addMessage = (content: string, type: 'user' | 'assistant' | 'system', metadata?: any) => {
     const newMessage: ChatMessage = {
       id: generateId(),
@@ -123,17 +127,11 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
           childId: child.id
         }
         
-        // Start story generation
+        // Start streaming story generation
         setIsGenerating(true)
-        const storyMessages = await requestStoryGeneration(storyRequest, updatedMessages)
-        setMessages(storyMessages)
-        
-        // Extract story ID and start polling
-        const storyGenMessage = storyMessages[storyMessages.length - 1]
-        if (storyGenMessage.metadata?.data?.storyId) {
-          const storyId = storyGenMessage.metadata.data.storyId
-          pollForStoryCompletion(storyId)
-        }
+        const streamedStory = await generateStreamingStory(storyRequest)
+        setStreamingStory(streamedStory)
+        setIsGenerating(false)
       }
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -161,17 +159,14 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       // Add user message about theme selection
       addMessage(`I'd love a ${theme.name.toLowerCase()} story!`, 'user')
       
-      // Request story generation
-      const updatedMessages = await requestStoryGeneration(storyRequest, messages)
-      setMessages(updatedMessages)
+      // Add AI response message
+      addMessage(`🎉 Perfect choice! I'm creating a wonderful ${theme.name.toLowerCase()} story for ${child.name}. This will be magical!`, 'assistant')
       
-      // Extract story ID from the response metadata
-      const lastMessage = updatedMessages[updatedMessages.length - 1]
-      if (lastMessage.metadata?.data?.storyId) {
-        const storyId = lastMessage.metadata.data.storyId
-        // Start polling for completion
-        pollForStoryCompletion(storyId)
-      }
+      // Start streaming story generation
+      const streamedStory = await generateStreamingStory(storyRequest)
+      setStreamingStory(streamedStory)
+      setIsGenerating(false)
+      
     } catch (error) {
       console.error('Failed to create story:', error)
       addMessage('Sorry, I had trouble creating your story. Please try again.', 'assistant')
@@ -180,48 +175,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
   }
 
 
-  // Poll for story completion
-  const pollForStoryCompletion = async (storyId: string) => {
-    const maxAttempts = 30 // 30 seconds max
-    let attempts = 0
-    
-    const poll = async () => {
-      if (attempts >= maxAttempts) {
-        setIsGenerating(false)
-        addMessage('Story generation is taking longer than expected. Please check your library later.', 'assistant')
-        return
-      }
-      
-      try {
-        const completionMessages = await checkStoryGenerationStatus(storyId)
-        console.log(`Polling for story ${storyId}, attempt ${attempts}, found ${completionMessages.length} messages`)
-        
-        if (completionMessages.length > 0) {
-          // Story is complete
-          console.log('Story completed! Adding to messages:', completionMessages[0])
-          setMessages(prev => [...prev, ...completionMessages])
-          setIsGenerating(false)
-          
-          // Set the generated story for display
-          const completedStory = completionMessages[0]?.metadata?.data
-          if (completedStory) {
-            setGeneratedStory(completedStory)
-          }
-          return
-        }
-        
-        // Continue polling
-        attempts++
-        setTimeout(poll, 1000)
-      } catch (error) {
-        console.error('Error polling for story completion:', error)
-        attempts++
-        setTimeout(poll, 1000)
-      }
-    }
-    
-    setTimeout(poll, 1000) // Start polling after 1 second
-  }
+  // Note: Polling functionality replaced with streaming story generation
 
   const handleStartNewStory = async () => {
     try {
@@ -233,6 +187,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       setSelectedTheme('')
       setGeneratedStory(null)
       setIsGenerating(false)
+      setStreamingStory(null)
     } catch (error) {
       console.error('Failed to restart chat:', error)
     }
@@ -290,17 +245,10 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
           </div>
         ))}
         
-        {/* Generation progress */}
-        {isGenerating && (
+        {/* Streaming story generation */}
+        {streamingStory && (
           <div className="ml-8 mr-16">
-            <Card className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
-                </div>
-                <span className="font-medium text-foreground">Creating your magical story...</span>
-              </div>
-            </Card>
+            {streamingStory}
           </div>
         )}
         

@@ -137,7 +137,7 @@ export function ChildProfileSetup({ onComplete, onBack }: ChildProfileSetupProps
             <form onSubmit={handleBasicInfoSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What's their name?
+                  What&apos;s their name?
                 </label>
                 <input
                   type="text"

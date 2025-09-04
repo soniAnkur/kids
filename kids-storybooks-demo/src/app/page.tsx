@@ -9,11 +9,34 @@ import { ChildProfileSetup } from '@/components/child/ChildProfileSetup'
 import { StoryLibrary } from '@/components/story/StoryLibrary'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { mockChildren, mockUser } from '@/data/mock-data'
 import { Child, User } from '@/types'
+import { getChildren } from '@/actions/child-actions'
+
+const mockUser: User = {
+  id: 'user-1',
+  email: 'parent@example.com',
+  name: 'Sarah Johnson',
+  children: [],
+  subscription: {
+    type: 'premium',
+    storiesPerMonth: 10,
+    hasVoiceNarration: true,
+    hasPrintOnDemand: true,
+    hasAdvancedCustomization: true
+  },
+  createdAt: new Date('2024-01-10'),
+  preferences: {
+    defaultStoryLength: 'medium',
+    autoShare: false,
+    emailNotifications: true,
+    pushNotifications: true,
+    contentSafety: 'strict'
+  }
+}
 
 export default function HomePage() {
   const [currentUser, setCurrentUser] = useState<User>(mockUser)
+  const [loading, setLoading] = useState(true)
   const [selectedChild, setSelectedChild] = useState<Child | null>(null)
   const [showChat, setShowChat] = useState(false)
   const [showLibrary, setShowLibrary] = useState(false)
@@ -31,12 +54,37 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Auto-select first child if available
+  // Load children on component mount
   useEffect(() => {
-    if (currentUser.children.length > 0 && !selectedChild) {
+    async function loadChildren() {
+      try {
+        setLoading(true)
+        const children = await getChildren()
+        setCurrentUser(prev => ({
+          ...prev,
+          children
+        }))
+        
+        // Auto-select first child if available
+        if (children.length > 0 && !selectedChild) {
+          setSelectedChild(children[0])
+        }
+      } catch (error) {
+        console.error('Failed to load children:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadChildren()
+  }, [])
+
+  // Auto-select first child when children are loaded
+  useEffect(() => {
+    if (currentUser.children.length > 0 && !selectedChild && !loading) {
       setSelectedChild(currentUser.children[0])
     }
-  }, [currentUser.children, selectedChild])
+  }, [currentUser.children, selectedChild, loading])
 
   const handleStartStoryCreation = () => {
     if (!selectedChild) {
@@ -89,7 +137,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen">
         <StoryLibrary
-          children={currentUser.children}
+          childrenData={currentUser.children}
           onBack={handleBackToHome}
           onCreateStory={handleStartStoryCreation}
         />
@@ -109,6 +157,18 @@ export default function HomePage() {
     )
   }
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent animate-spin rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Main homepage view
   return (
     <div className="min-h-screen bg-background">
@@ -124,7 +184,7 @@ export default function HomePage() {
               Choose your storyteller
             </h2>
             <ChildSelector
-              children={currentUser.children}
+              childrenData={currentUser.children}
               selectedChild={selectedChild}
               onSelectChild={setSelectedChild}
               onAddChild={handleAddChild}

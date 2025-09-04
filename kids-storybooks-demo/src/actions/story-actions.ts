@@ -123,6 +123,16 @@ export async function incrementReadCount(storyId: string): Promise<void> {
   console.log(`Incremented read count for story ${storyId}`)
 }
 
+export async function saveGeneratedStory(story: Story): Promise<void> {
+  // Add the story to our in-memory storage
+  generatedStories.push(story)
+  console.log(`Story ${story.id} saved to storage. Total stories: ${generatedStories.length}`)
+  console.log('All story IDs:', generatedStories.map(s => s.id))
+  
+  // Notify any listeners that a new story was generated
+  notifyStoryGenerated(story)
+}
+
 export async function getStoryThemes() {
   await new Promise(resolve => setTimeout(resolve, 50))
   

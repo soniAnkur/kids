@@ -62,7 +62,7 @@ export function ThemeSelector({ themes, onThemeSelect, disabled = false }: Theme
       
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-500">
-          Don't see what you want? Just describe it in your message!
+          Don&apos;t see what you want? Just describe it in your message!
         </p>
       </div>
     </div>

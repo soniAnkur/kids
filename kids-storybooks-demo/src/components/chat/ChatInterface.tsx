@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Child, User, ChatMessage, Story } from '@/types'
+import { Child, User, ChatMessage, Story, StoryRequest } from '@/types'
 import { ChatHeader } from './ChatHeader'
 import { ChatMessageBubble } from './ChatMessageBubble'
 import { ChatInput } from './ChatInput'
@@ -10,8 +10,10 @@ import { StoryPreview } from '../story/StoryPreview'
 import { StoryReader } from '../story/StoryReader'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { generateId, delay, simulateApiCall } from '@/lib/utils'
-import { mockChatMessages, storyThemes, aiResponses, mockStories } from '@/data/mock-data'
+import { generateId, delay } from '@/lib/utils'
+import { sendChatMessage, getInitialChatMessage, requestStoryGeneration, checkStoryGenerationStatus } from '@/actions/chat-actions'
+import { getStoryThemes } from '@/actions/story-actions'
+import { onStoryGenerated } from '@/lib/story-events'
 
 interface ChatInterfaceProps {
   child: Child
@@ -20,21 +22,71 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      ...mockChatMessages[0],
-      content: `Hi! I'm here to help you create magical personalized stories for ${child.name}. What kind of adventure should we create today?`
-    }
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [storyThemes, setStoryThemes] = useState<any[]>([])
   
-  const [currentStep, setCurrentStep] = useState<'greeting' | 'theme-selection' | 'generating' | 'completed'>('greeting')
   const [selectedTheme, setSelectedTheme] = useState<string>('')
   const [generatedStory, setGeneratedStory] = useState<Story | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [generationProgress, setGenerationProgress] = useState(0)
   const [showStoryReader, setShowStoryReader] = useState(false)
+  const [loading, setLoading] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Initialize chat and load themes
+  useEffect(() => {
+    async function initializeChat() {
+      try {
+        const [initialMessage, themes] = await Promise.all([
+          getInitialChatMessage(),
+          getStoryThemes()
+        ])
+        
+        setMessages([{
+          ...initialMessage,
+          content: `Hi! I'm here to help you create magical personalized stories for ${child.name}. What kind of adventure should we create today?`
+        }])
+        setStoryThemes(themes)
+      } catch (error) {
+        console.error('Failed to initialize chat:', error)
+      }
+    }
+    
+    initializeChat()
+  }, [child.name])
+
+  // Listen for completed story generations
+  useEffect(() => {
+    const unsubscribe = onStoryGenerated((story) => {
+      if (story.childId === child.id) {
+        setGeneratedStory(story)
+        setIsGenerating(false)
+        
+        // Add completion message
+        const completionMessage: ChatMessage = {
+          id: `msg-completion-${Date.now()}`,
+          type: 'assistant',
+          content: `🎉 ${child.name}'s story "${story.title}" is ready! It's a wonderful adventure with ${story.content.length} pages.`,
+          timestamp: new Date(),
+          metadata: {
+            component: 'story-preview',
+            action: 'completed',
+            data: story,
+            isGenerationUpdate: true
+          }
+        }
+        
+        setMessages(prev => [...prev, completionMessage])
+      } else {
+        // For other children's stories, just update the generated story if it matches
+        if (story.id === generatedStory?.id) {
+          setGeneratedStory(story)
+        }
+      }
+    })
+    
+    return unsubscribe
+  }, [child.id, child.name])
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -55,20 +107,39 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
   }
 
   const handleUserMessage = async (content: string) => {
-    // Add user message
-    addMessage(content, 'user')
+    if (loading) return
     
-    // Simulate AI response delay
-    await delay(1000)
+    setLoading(true)
     
-    if (currentStep === 'greeting') {
-      // Show theme selection
-      addMessage(
-        "Perfect! Let's choose what kind of story you'd like me to create for " + child.name + ". What adventure sounds most exciting?",
-        'assistant',
-        { component: 'theme-selector' }
-      )
-      setCurrentStep('theme-selection')
+    try {
+      const updatedMessages = await sendChatMessage(content, messages)
+      setMessages(updatedMessages)
+      
+      // Check if the AI wants to create a story
+      const lastMessage = updatedMessages[updatedMessages.length - 1]
+      if (lastMessage.metadata?.component === 'story-request') {
+        const storyRequest: StoryRequest = {
+          ...lastMessage.metadata.data,
+          childId: child.id
+        }
+        
+        // Start story generation
+        setIsGenerating(true)
+        const storyMessages = await requestStoryGeneration(storyRequest, updatedMessages)
+        setMessages(storyMessages)
+        
+        // Extract story ID and start polling
+        const storyGenMessage = storyMessages[storyMessages.length - 1]
+        if (storyGenMessage.metadata?.data?.storyId) {
+          const storyId = storyGenMessage.metadata.data.storyId
+          pollForStoryCompletion(storyId)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error)
+      addMessage('Sorry, I had trouble processing your message. Please try again.', 'assistant')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -78,76 +149,93 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
 
     setSelectedTheme(themeId)
     
-    // Add user message about theme selection
-    addMessage(`I'd love a ${theme.name.toLowerCase()} story!`, 'user')
-    
-    // Show confirmation and start generation
-    await delay(800)
-    const responseTemplate = aiResponses.storyRequest[Math.floor(Math.random() * aiResponses.storyRequest.length)]
-    const response = responseTemplate
-      .replace('{childName}', child.name)
-      .replace('{theme}', theme.name.toLowerCase())
-    
-    addMessage(response, 'assistant')
-    
-    // Start story generation
-    setCurrentStep('generating')
-    setIsGenerating(true)
-    await generateStory(theme.name)
-  }
-
-  const generateStory = async (themeName: string) => {
-    const steps = [
-      { message: `Analyzing ${child.name}'s personality and interests...`, progress: 20 },
-      { message: `Writing a magical ${themeName.toLowerCase()} adventure...`, progress: 50 },
-      { message: `Creating beautiful illustrations featuring ${child.name}...`, progress: 80 },
-      { message: `Adding the finishing touches...`, progress: 95 }
-    ]
-
-    for (const step of steps) {
-      await delay(2000)
-      setGenerationProgress(step.progress)
-      addMessage(step.message, 'assistant', { isGenerationUpdate: true })
-    }
-
-    // Complete generation
-    await delay(1500)
-    setGenerationProgress(100)
-    
-    // Create a mock story based on the theme
-    const newStory: Story = {
-      ...mockStories[0],
-      id: generateId(),
-      title: `${child.name} and the ${themeName} Adventure`,
-      theme: themeName,
+    const storyRequest: StoryRequest = {
       childId: child.id,
-      generatedAt: new Date(),
-      readCount: 0,
-      isFavorite: false
+      theme: theme.name,
+      preferredLength: 'medium'
     }
     
-    setGeneratedStory(newStory)
-    setIsGenerating(false)
-    setCurrentStep('completed')
-    
-    const completionResponse = aiResponses.completed[0]
-      .replace('{childName}', child.name)
-      .replace('{title}', newStory.title)
-    
-    addMessage(completionResponse, 'assistant', { component: 'story-preview', story: newStory })
+    try {
+      setIsGenerating(true)
+      
+      // Add user message about theme selection
+      addMessage(`I'd love a ${theme.name.toLowerCase()} story!`, 'user')
+      
+      // Request story generation
+      const updatedMessages = await requestStoryGeneration(storyRequest, messages)
+      setMessages(updatedMessages)
+      
+      // Extract story ID from the response metadata
+      const lastMessage = updatedMessages[updatedMessages.length - 1]
+      if (lastMessage.metadata?.data?.storyId) {
+        const storyId = lastMessage.metadata.data.storyId
+        // Start polling for completion
+        pollForStoryCompletion(storyId)
+      }
+    } catch (error) {
+      console.error('Failed to create story:', error)
+      addMessage('Sorry, I had trouble creating your story. Please try again.', 'assistant')
+      setIsGenerating(false)
+    }
   }
 
-  const handleStartNewStory = () => {
-    setMessages([
-      {
-        ...mockChatMessages[0],
-        content: `Great! Let's create another amazing story for ${child.name}. What adventure should we go on this time?`
+
+  // Poll for story completion
+  const pollForStoryCompletion = async (storyId: string) => {
+    const maxAttempts = 30 // 30 seconds max
+    let attempts = 0
+    
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        setIsGenerating(false)
+        addMessage('Story generation is taking longer than expected. Please check your library later.', 'assistant')
+        return
       }
-    ])
-    setCurrentStep('greeting')
-    setSelectedTheme('')
-    setGeneratedStory(null)
-    setGenerationProgress(0)
+      
+      try {
+        const completionMessages = await checkStoryGenerationStatus(storyId)
+        console.log(`Polling for story ${storyId}, attempt ${attempts}, found ${completionMessages.length} messages`)
+        
+        if (completionMessages.length > 0) {
+          // Story is complete
+          console.log('Story completed! Adding to messages:', completionMessages[0])
+          setMessages(prev => [...prev, ...completionMessages])
+          setIsGenerating(false)
+          
+          // Set the generated story for display
+          const completedStory = completionMessages[0]?.metadata?.data
+          if (completedStory) {
+            setGeneratedStory(completedStory)
+          }
+          return
+        }
+        
+        // Continue polling
+        attempts++
+        setTimeout(poll, 1000)
+      } catch (error) {
+        console.error('Error polling for story completion:', error)
+        attempts++
+        setTimeout(poll, 1000)
+      }
+    }
+    
+    setTimeout(poll, 1000) // Start polling after 1 second
+  }
+
+  const handleStartNewStory = async () => {
+    try {
+      const initialMessage = await getInitialChatMessage()
+      setMessages([{
+        ...initialMessage,
+        content: `Great! Let's create another amazing story for ${child.name}. What adventure should we go on this time?`
+      }])
+      setSelectedTheme('')
+      setGeneratedStory(null)
+      setIsGenerating(false)
+    } catch (error) {
+      console.error('Failed to restart chat:', error)
+    }
   }
 
   // Show story reader if active
@@ -175,24 +263,25 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
           <div key={message.id}>
             <ChatMessageBubble message={message} />
             
-            {/* Show theme selector after specific message */}
-            {message.metadata?.component === 'theme-selector' && (
+            {/* Show theme selector when available */}
+            {storyThemes.length > 0 && !selectedTheme && !isGenerating && messages.length > 1 && (
               <div className="mt-4 ml-8 mr-16">
                 <ThemeSelector
                   themes={storyThemes}
                   onThemeSelect={handleThemeSelection}
-                  disabled={isGenerating}
+                  disabled={loading}
                 />
               </div>
             )}
             
             {/* Show story preview */}
-            {message.metadata?.component === 'story-preview' && generatedStory && (
+            {message.metadata?.component === 'story-preview' && message.metadata?.data && (
               <div className="mt-4 ml-8 mr-16">
                 <StoryPreview
-                  story={generatedStory}
+                  story={message.metadata.data}
                   onStartNewStory={handleStartNewStory}
                   onReadStory={() => {
+                    setGeneratedStory(message.metadata.data)
                     setShowStoryReader(true)
                   }}
                 />
@@ -205,14 +294,12 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
         {isGenerating && (
           <div className="ml-8 mr-16">
             <Card className="p-4">
-              <div className="flex items-center space-x-3 mb-3">
+              <div className="flex items-center space-x-3">
                 <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
                   <div className="w-3 h-3 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
                 </div>
-                <span className="font-medium text-foreground">Creating story...</span>
+                <span className="font-medium text-foreground">Creating your magical story...</span>
               </div>
-              <Progress value={generationProgress} className="w-full mb-2" />
-              <p className="text-sm text-muted-foreground">{generationProgress}%</p>
             </Card>
           </div>
         )}
@@ -221,12 +308,12 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       </div>
       
       {/* Chat Input */}
-      {!isGenerating && currentStep !== 'completed' && (
+      {!isGenerating && (
         <div className="border-t border-border bg-background p-4">
           <ChatInput 
             onSendMessage={handleUserMessage}
             placeholder={`Tell me what kind of story ${child.name} would love...`}
-            disabled={currentStep === 'theme-selection'}
+            disabled={loading}
           />
         </div>
       )}

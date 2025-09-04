@@ -17,7 +17,7 @@ export function StoryReader({ story, onClose, onShare }: StoryReaderProps) {
   useEffect(() => {
     // Mark story as read (increment read count)
     console.log(`Story "${story.title}" being read - would increment read count in real app`)
-  }, [story.id])
+  }, [story.id, story.title])
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -63,7 +63,20 @@ export function StoryReader({ story, onClose, onShare }: StoryReaderProps) {
         <div className="max-w-md w-full bg-white border border-gray-200">
           {/* Illustration */}
           <div className="h-64 bg-gray-100 flex items-center justify-center">
-            <div className="text-center">
+            {currentStoryPage.illustration ? (
+              <img
+                src={currentStoryPage.illustration}
+                alt={`Illustration for page ${currentPage + 1}`}
+                className="max-h-full max-w-full object-contain"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className="text-center hidden">
               <div className="w-24 h-16 bg-white border border-gray-300 flex items-center justify-center mx-auto">
                 <div className="w-8 h-8 bg-gray-400"></div>
               </div>

@@ -16,12 +16,21 @@ export function StoryPreview({ story, onStartNewStory, onReadStory }: StoryPrevi
   return (
     <Card className="overflow-hidden">
       {/* Story Cover */}
-      <div className="h-48 bg-muted/30 flex items-center justify-center">
-        <div className="text-center p-6">
+      <div className="h-48 bg-muted/30 flex items-center justify-center relative">
+        {story.coverImage ? (
+          <img
+            src={story.coverImage}
+            alt={`Cover for ${story.title}`}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : null}
+        <div className="relative z-10 text-center p-6 bg-background/80 backdrop-blur-sm rounded-lg">
           <CardTitle className="text-xl mb-4">{story.title}</CardTitle>
-          <div className="w-24 h-16 bg-background border border-border rounded-md flex items-center justify-center mx-auto">
-            <div className="w-8 h-8 bg-muted rounded"></div>
-          </div>
+          {!story.coverImage && (
+            <div className="w-24 h-16 bg-background border border-border rounded-md flex items-center justify-center mx-auto">
+              <div className="w-8 h-8 bg-muted rounded"></div>
+            </div>
+          )}
         </div>
       </div>
       

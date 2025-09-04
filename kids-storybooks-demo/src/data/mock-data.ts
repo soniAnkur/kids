@@ -86,7 +86,7 @@ export const mockStories: Story[] = [
   },
   {
     id: 'story-2',
-    title: 'Liam's Space Mission to Mars',
+    title: "Liam's Space Mission to Mars",
     theme: 'Space Adventure',
     childId: 'child-2',
     content: [
@@ -140,7 +140,7 @@ export const mockChatMessages: ChatMessage[] = [
   {
     id: 'msg-1',
     type: 'assistant',
-    content: 'Hi! I\'m here to help you create magical personalized stories for your child. What kind of adventure should we create today?',
+    content: "Hi! I'm here to help you create magical personalized stories for your child. What kind of adventure should we create today?",
     timestamp: new Date()
   }
 ]

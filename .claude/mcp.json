@@ -1,0 +1,25 @@
+{
+    "mcpServers": {
+        "shadcn": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "mcp-remote",
+                "https://www.shadcn.io/api/mcp"
+            ]
+        },
+        "n8n-mcp": {
+            "command": "npx",
+            "args": [
+                "n8n-mcp"
+            ],
+            "env": {
+                "MCP_MODE": "stdio",
+                "LOG_LEVEL": "error",
+                "DISABLE_CONSOLE_OUTPUT": "true",
+                "N8N_API_URL": "http://localhost:5678",
+                "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiMTE5YWM1MC01MmU0LTQyZWMtOWE5My1jMTQzMmEyOTEzNjYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2OTYyNjAyLCJleHAiOjE3NTk1NTA0MDB9.vYXbhAEgY3qDFx1SBeFreEOB2Qv7TaCNjSBpJ5yyae8"
+            }
+        }
+    }
+}

@@ -3,10 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
   body {
     @apply bg-gradient-to-br from-blue-50 to-purple-50 text-gray-900;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;

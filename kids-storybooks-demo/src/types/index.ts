@@ -59,6 +59,7 @@ export interface ChatMessage {
     component?: string;
     action?: string;
     data?: any;
+    isGenerationUpdate?: boolean;
   };
 }
 

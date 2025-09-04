@@ -7,6 +7,8 @@ import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
 import { ChildSelector } from '@/components/child/ChildSelector'
 import { ChildProfileSetup } from '@/components/child/ChildProfileSetup'
 import { StoryLibrary } from '@/components/story/StoryLibrary'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { mockChildren, mockUser } from '@/data/mock-data'
 import { Child, User } from '@/types'
 
@@ -109,7 +111,7 @@ export default function HomePage() {
 
   // Main homepage view
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <WelcomeHeader user={currentUser} />
       
@@ -118,7 +120,7 @@ export default function HomePage() {
         {/* Child Selection */}
         {currentUser.children.length > 0 ? (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               Choose your storyteller
             </h2>
             <ChildSelector
@@ -130,112 +132,109 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                Let's get started!
-              </h2>
-              <p className="text-gray-600 mb-4">
-                First, let's set up a profile for your child so I can create personalized stories just for them.
-              </p>
-              <button 
+            <Card className="p-6">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-xl">Get started</CardTitle>
+                <CardDescription>
+                  Set up a profile for your child to create personalized stories.
+                </CardDescription>
+              </CardHeader>
+              <Button 
                 onClick={handleAddChild}
-                className="bg-primary-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-600 transition-colors"
+                size="lg"
+                className="w-full sm:w-auto"
               >
                 Add Your First Child
-              </button>
-            </div>
+              </Button>
+            </Card>
           </div>
         )}
 
         {/* Quick Actions */}
         {selectedChild && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               What would you like to do?
             </h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Create New Story */}
-              <button
-                onClick={handleStartStoryCreation}
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left group"
-              >
-                <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                    <span className="text-2xl">✨</span>
+              <Card className="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]" onClick={handleStartStoryCreation}>
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <div className="w-6 h-6 bg-primary rounded-full"></div>
+                    </div>
+                    <CardTitle className="text-lg ml-3">
+                      Create Story
+                    </CardTitle>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800 ml-3">
-                    Create New Story
-                  </h3>
-                </div>
-                <p className="text-gray-600">
-                  Start a conversation to create a magical personalized story for {selectedChild.name}
-                </p>
-              </button>
+                  <CardDescription>
+                    Create a personalized story for {selectedChild.name}
+                  </CardDescription>
+                </CardContent>
+              </Card>
 
               {/* View Library */}
-              <button
-                onClick={handleViewLibrary}
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left group"
-              >
-                <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center group-hover:bg-secondary-200 transition-colors">
-                    <span className="text-2xl">📚</span>
+              <Card className="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]" onClick={handleViewLibrary}>
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                      <div className="w-6 h-6 bg-muted-foreground rounded"></div>
+                    </div>
+                    <CardTitle className="text-lg ml-3">
+                      Story Library
+                    </CardTitle>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800 ml-3">
-                    Story Library
-                  </h3>
-                </div>
-                <p className="text-gray-600">
-                  Browse and read previously created stories
-                </p>
-              </button>
+                  <CardDescription>
+                    Browse previously created stories
+                  </CardDescription>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
 
         {/* Feature Highlights */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Why kids love KidsVerse stories
+          <h2 className="text-xl font-semibold text-foreground mb-4">
+            Features
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-              <div className="w-10 h-10 bg-kids-blue/20 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-kids-blue text-xl">🎭</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 mb-1">They're the Hero</h4>
-              <p className="text-sm text-gray-600">Your child becomes the main character in every adventure</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
+                  <div className="w-4 h-4 bg-primary rounded"></div>
+                </div>
+                <h4 className="font-semibold text-foreground mb-1">Personalized</h4>
+                <p className="text-sm text-muted-foreground">Your child as the main character</p>
+              </CardContent>
+            </Card>
             
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-              <div className="w-10 h-10 bg-kids-green/20 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-kids-green text-xl">🧠</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 mb-1">Educational Fun</h4>
-              <p className="text-sm text-gray-600">Every story includes age-appropriate learning objectives</p>
-            </div>
+            <Card>
+              <CardContent className="p-4">
+                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mb-3">
+                  <div className="w-4 h-4 bg-muted-foreground rounded"></div>
+                </div>
+                <h4 className="font-semibold text-foreground mb-1">Educational</h4>
+                <p className="text-sm text-muted-foreground">Age-appropriate learning content</p>
+              </CardContent>
+            </Card>
             
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-              <div className="w-10 h-10 bg-kids-pink/20 rounded-lg flex items-center justify-center mb-3">
-                <span className="text-kids-pink text-xl">🎨</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 mb-1">Beautiful Art</h4>
-              <p className="text-sm text-gray-600">Custom illustrations that look like your child</p>
-            </div>
+            <Card>
+              <CardContent className="p-4">
+                <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center mb-3">
+                  <div className="w-4 h-4 bg-accent rounded"></div>
+                </div>
+                <h4 className="font-semibold text-foreground mb-1">Interactive</h4>
+                <p className="text-sm text-muted-foreground">Engaging story experience</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
 
-      {/* Floating Action Button */}
-      {selectedChild && (
-        <FloatingActionButton
-          onClick={handleStartStoryCreation}
-          icon="✨"
-          label="Create Story"
-        />
-      )}
     </div>
   )
 }

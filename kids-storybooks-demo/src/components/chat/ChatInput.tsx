@@ -1,6 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Send } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
@@ -53,16 +57,18 @@ export function ChatInput({
       {/* Quick suggestions */}
       {message.length === 0 && !disabled && (
         <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-2">Quick suggestions:</p>
+          <p className="text-xs text-muted-foreground mb-2">Quick suggestions:</p>
           <div className="flex flex-wrap gap-2">
             {quickSuggestions.map((suggestion) => (
-              <button
+              <Button
                 key={suggestion}
                 onClick={() => setMessage(suggestion)}
-                className="px-3 py-1 bg-white/60 hover:bg-white/80 rounded-full text-sm text-gray-700 border border-white/40 transition-colors"
+                variant="outline"
+                size="sm"
+                className="rounded-full text-xs h-7"
               >
                 {suggestion}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -71,7 +77,7 @@ export function ChatInput({
       {/* Input form */}
       <form onSubmit={handleSubmit} className="flex items-end space-x-3">
         <div className="flex-1 relative">
-          <textarea
+          <Textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -80,30 +86,23 @@ export function ChatInput({
             onCompositionEnd={() => setIsComposing(false)}
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full px-4 py-3 bg-white rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none min-h-[52px] max-h-[120px] disabled:bg-gray-100 disabled:text-gray-500"
+            className={cn(
+              "resize-none min-h-[52px] max-h-[120px] rounded-2xl transition-all",
+              "focus:ring-2 focus:ring-primary focus:border-primary"
+            )}
             rows={1}
           />
         </div>
         
-        <button
+        <Button
           type="submit"
           disabled={!message.trim() || disabled || isComposing}
-          className="w-12 h-12 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 rounded-2xl flex items-center justify-center text-white transition-colors shadow-lg flex-shrink-0"
+          size="icon"
+          className="w-12 h-12 rounded-2xl shadow-lg flex-shrink-0"
         >
-          <svg 
-            className="w-5 h-5" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" 
-            />
-          </svg>
-        </button>
+          <Send className="w-5 h-5" />
+          <span className="sr-only">Send message</span>
+        </Button>
       </form>
     </div>
   )

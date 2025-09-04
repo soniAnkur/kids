@@ -1,7 +1,11 @@
 'use client'
 
 import { Child } from '@/types'
-import { getInitials } from '@/lib/utils'
+import { getInitials, cn } from '@/lib/utils'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Plus } from 'lucide-react'
 
 interface ChildSelectorProps {
   children: Child[]
@@ -20,63 +24,70 @@ export function ChildSelector({
     <div className="flex space-x-3 overflow-x-auto pb-2">
       {/* Existing children */}
       {children.map((child) => (
-        <button
+        <Button
           key={child.id}
           onClick={() => onSelectChild(child)}
-          className={`flex flex-col items-center space-y-2 min-w-0 flex-shrink-0 p-3 rounded-xl transition-all duration-200 ${
+          variant="outline"
+          className={cn(
+            "flex flex-col items-center space-y-2 min-w-0 flex-shrink-0 h-auto p-3 rounded-lg",
             selectedChild?.id === child.id
-              ? 'bg-primary-100 border-2 border-primary-300'
-              : 'bg-white border-2 border-transparent hover:bg-gray-50'
-          }`}
+              ? "bg-primary/5 border-primary text-primary hover:bg-primary/10"
+              : "bg-background hover:bg-muted/50"
+          )}
         >
           <div className="relative">
-            {child.photoUrl ? (
-              <img
-                src={child.photoUrl}
-                alt={child.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
-              />
-            ) : (
-              <div className="child-avatar">
+            <Avatar className="w-12 h-12">
+              {child.photoUrl ? (
+                <AvatarImage
+                  src={child.photoUrl}
+                  alt={child.name}
+                  className="object-cover"
+                />
+              ) : null}
+              <AvatarFallback className="bg-primary/10 text-primary font-medium">
                 {getInitials(child.name)}
-              </div>
-            )}
+              </AvatarFallback>
+            </Avatar>
             
             {/* Age badge */}
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-kids-yellow rounded-full flex items-center justify-center text-xs font-bold text-gray-800 shadow-lg">
+            <Badge 
+              variant="secondary" 
+              className="absolute -bottom-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs rounded-full"
+            >
               {child.age}
-            </div>
+            </Badge>
           </div>
           
           <div className="text-center min-w-0">
-            <p className="font-semibold text-gray-800 text-sm truncate max-w-[80px]">
+            <p className="font-medium text-sm truncate max-w-[80px]">
               {child.name}
             </p>
-            <p className="text-xs text-gray-500">
-              {child.age} years old
+            <p className="text-xs text-muted-foreground">
+              Age {child.age}
             </p>
           </div>
-        </button>
+        </Button>
       ))}
       
       {/* Add child button */}
-      <button
+      <Button
         onClick={onAddChild}
-        className="flex flex-col items-center space-y-2 min-w-0 flex-shrink-0 p-3 rounded-xl bg-white border-2 border-dashed border-gray-300 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200"
+        variant="outline"
+        className="flex flex-col items-center space-y-2 min-w-0 flex-shrink-0 h-auto p-3 border-dashed border-2 hover:bg-muted/50"
       >
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-primary-500 transition-colors">
-          <span className="text-2xl">+</span>
+        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
+          <Plus className="w-5 h-5" />
         </div>
         
         <div className="text-center">
-          <p className="font-semibold text-gray-600 text-sm">
+          <p className="font-medium text-sm">
             Add Child
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             New profile
           </p>
         </div>
-      </button>
+      </Button>
     </div>
   )
 }

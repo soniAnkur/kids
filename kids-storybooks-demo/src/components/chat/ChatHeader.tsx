@@ -2,6 +2,10 @@
 
 import { Child } from '@/types'
 import { getInitials } from '@/lib/utils'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ChevronLeft } from 'lucide-react'
 
 interface ChatHeaderProps {
   child: Child
@@ -10,51 +14,44 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ child, onBack }: ChatHeaderProps) {
   return (
-    <header className="bg-glass border-b border-white/20 px-4 py-4 sticky top-0 z-40">
+    <header className="bg-background border-b border-border px-4 py-4">
       <div className="flex items-center space-x-4">
         {/* Back button */}
-        <button
+        <Button
           onClick={onBack}
-          className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+          variant="ghost"
+          size="sm"
+          className="w-8 h-8 p-0 rounded-md hover:bg-muted"
         >
-          <svg 
-            className="w-5 h-5 text-gray-600" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+          <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+          <span className="sr-only">Go back</span>
+        </Button>
 
         {/* Child info */}
         <div className="flex items-center space-x-3 flex-1">
-          {child.photoUrl ? (
-            <img
-              src={child.photoUrl}
-              alt={child.name}
-              className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-lg"
-            />
-          ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+          <Avatar className="w-8 h-8">
+            {child.photoUrl ? (
+              <AvatarImage
+                src={child.photoUrl}
+                alt={child.name}
+                className="object-cover"
+              />
+            ) : null}
+            <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
               {getInitials(child.name)}
-            </div>
-          )}
+            </AvatarFallback>
+          </Avatar>
           
-          <div>
-            <h2 className="font-semibold text-gray-800">
-              Creating a story for {child.name}
+          <div className="flex-1">
+            <h2 className="font-semibold text-foreground">
+              Story for {child.name}
             </h2>
-            <p className="text-sm text-gray-600">
-              Age {child.age} • {child.personality.length} personality traits
-            </p>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                Age {child.age}
+              </Badge>
+            </div>
           </div>
-        </div>
-
-        {/* Status indicator */}
-        <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs text-gray-600 hidden sm:inline">AI Assistant</span>
         </div>
       </div>
     </header>

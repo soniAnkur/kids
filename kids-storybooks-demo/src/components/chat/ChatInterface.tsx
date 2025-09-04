@@ -7,6 +7,9 @@ import { ChatMessageBubble } from './ChatMessageBubble'
 import { ChatInput } from './ChatInput'
 import { ThemeSelector } from './ThemeSelector'
 import { StoryPreview } from '../story/StoryPreview'
+import { StoryReader } from '../story/StoryReader'
+import { Card } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { generateId, delay, simulateApiCall } from '@/lib/utils'
 import { mockChatMessages, storyThemes, aiResponses, mockStories } from '@/data/mock-data'
 
@@ -29,6 +32,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
   const [generatedStory, setGeneratedStory] = useState<Story | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
+  const [showStoryReader, setShowStoryReader] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -146,8 +150,22 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
     setGenerationProgress(0)
   }
 
+  // Show story reader if active
+  if (showStoryReader && generatedStory) {
+    return (
+      <StoryReader
+        story={generatedStory}
+        onClose={() => setShowStoryReader(false)}
+        onShare={() => {
+          console.log('Share story:', generatedStory.id)
+          // In a real app, this would handle sharing
+        }}
+      />
+    )
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <ChatHeader child={child} onBack={onBack} />
       
@@ -175,8 +193,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
                   story={generatedStory}
                   onStartNewStory={handleStartNewStory}
                   onReadStory={() => {
-                    console.log('Open story reader for:', generatedStory.id)
-                    // In a real app, this would navigate to the story reader
+                    setShowStoryReader(true)
                   }}
                 />
               </div>
@@ -187,21 +204,16 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
         {/* Generation progress */}
         {isGenerating && (
           <div className="ml-8 mr-16">
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+            <Card className="p-4">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                  <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
                 </div>
-                <span className="font-medium text-gray-800">Creating your story...</span>
+                <span className="font-medium text-foreground">Creating story...</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-primary-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${generationProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">{generationProgress}% complete</p>
-            </div>
+              <Progress value={generationProgress} className="w-full mb-2" />
+              <p className="text-sm text-muted-foreground">{generationProgress}%</p>
+            </Card>
           </div>
         )}
         
@@ -210,7 +222,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       
       {/* Chat Input */}
       {!isGenerating && currentStep !== 'completed' && (
-        <div className="border-t border-white/20 bg-glass p-4">
+        <div className="border-t border-border bg-background p-4">
           <ChatInput 
             onSendMessage={handleUserMessage}
             placeholder={`Tell me what kind of story ${child.name} would love...`}

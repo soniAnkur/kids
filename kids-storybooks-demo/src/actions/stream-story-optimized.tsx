@@ -6,6 +6,7 @@ import { StoryRequest, Child, Story } from '@/types'
 import { generateStoryContent } from '@/lib/ai-story-generator'
 import { getChildren } from './child-actions'
 import { saveGeneratedStory } from './story-actions'
+// Remove direct component import for server action
 
 // Story generation placeholder component
 function StoryGenerationPlaceholder({ childName, theme }: { childName: string; theme: string }) {
@@ -36,53 +37,6 @@ function StoryGenerationPlaceholder({ childName, theme }: { childName: string; t
   )
 }
 
-// Simple story card component
-function StoryCard({ story }: { story: Story }) {
-  return (
-    <div className="border border-border rounded-lg p-6 bg-card space-y-4">
-      <div className="flex items-center space-x-2 text-sm text-green-600 mb-4">
-        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span>Story completed successfully!</span>
-      </div>
-      
-      <div className="flex items-start space-x-4">
-        <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-bold text-2xl">
-          📖
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg text-foreground mb-2">{story.title}</h3>
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
-            <span>{story.content.length} pages</span>
-            <span className="capitalize">{story.theme}</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            A personalized story created with AI just for your child!
-          </p>
-        </div>
-      </div>
-      
-      <div className="pt-4 border-t">
-        <p className="text-sm text-muted-foreground mb-3">
-          ✨ Your personalized story is ready! Created with AI just for your child.
-        </p>
-        <div className="flex space-x-2">
-          <button 
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition-colors"
-            disabled
-          >
-            Story Created! 📚
-          </button>
-          <button 
-            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md text-sm hover:bg-secondary/90 transition-colors"
-            disabled
-          >
-            Find in Library
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export async function generateStreamingStory(request: StoryRequest): Promise<ReactNode> {
   const stream = createStreamableUI(null)
@@ -147,8 +101,28 @@ export async function generateStreamingStory(request: StoryRequest): Promise<Rea
     await saveGeneratedStory(story)
     console.log('Story saved to global storage')
 
-    // Complete the stream with the final story
-    stream.done(<StoryCard story={story} />)
+    // Complete the stream with story completion message and trigger client-side event
+    stream.done(
+      <div className="border border-border rounded-lg p-6 bg-card">
+        <div className="flex items-center space-x-2 text-sm text-green-600 mb-4">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span>Story completed successfully!</span>
+        </div>
+        <div className="text-center">
+          <h3 className="font-semibold text-lg text-foreground mb-2">{story.title}</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            ✨ Your personalized story is ready! The interactive story card will appear below.
+          </p>
+        </div>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if (typeof window !== 'undefined' && window.__notifyStoryGenerated) {
+              window.__notifyStoryGenerated(${JSON.stringify(story)});
+            }
+          `
+        }} />
+      </div>
+    )
     
     console.log('=== Streaming story generation completed successfully ===')
 

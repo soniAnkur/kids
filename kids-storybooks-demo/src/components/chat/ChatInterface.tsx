@@ -96,6 +96,40 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Listen for events from the StreamedStoryCard
+  useEffect(() => {
+    const handleReadStory = (event: CustomEvent) => {
+      const story = event.detail?.story
+      if (story) {
+        console.log('CLIENT: Read story requested from streamed card:', story.title)
+        setGeneratedStory(story)
+        setShowStoryReader(true)
+        setStreamingStory(null) // Hide the streaming story card
+      }
+    }
+
+    const handleFindInLibrary = () => {
+      console.log('CLIENT: Find in library requested from streamed card')
+      // Here you could navigate to library or show a message
+      const libraryMessage = {
+        id: `msg-library-${Date.now()}`,
+        type: 'assistant' as const,
+        content: '💡 You can find this story in your Story Library!',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, libraryMessage])
+      setStreamingStory(null) // Hide the streaming story card
+    }
+
+    window.addEventListener('streamed-story:read', handleReadStory as EventListener)
+    window.addEventListener('streamed-story:library', handleFindInLibrary)
+
+    return () => {
+      window.removeEventListener('streamed-story:read', handleReadStory as EventListener)
+      window.removeEventListener('streamed-story:library', handleFindInLibrary)
+    }
+  }, [])
+
 
   const addMessage = (content: string, type: 'user' | 'assistant' | 'system', metadata?: any) => {
     const newMessage: ChatMessage = {
@@ -129,9 +163,12 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
         
         // Start streaming story generation
         setIsGenerating(true)
+        console.log('CLIENT: Starting streaming story generation...')
         const streamedStory = await generateStreamingStory(storyRequest)
+        console.log('CLIENT: Received streamed story:', !!streamedStory)
         setStreamingStory(streamedStory)
         setIsGenerating(false)
+        console.log('CLIENT: Streaming story state updated')
       }
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -163,9 +200,12 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       addMessage(`🎉 Perfect choice! I'm creating a wonderful ${theme.name.toLowerCase()} story for ${child.name}. This will be magical!`, 'assistant')
       
       // Start streaming story generation
+      console.log('CLIENT: Starting theme-based streaming story generation...')
       const streamedStory = await generateStreamingStory(storyRequest)
+      console.log('CLIENT: Received theme-based streamed story:', !!streamedStory)
       setStreamingStory(streamedStory)
       setIsGenerating(false)
+      console.log('CLIENT: Theme-based streaming story state updated')
       
     } catch (error) {
       console.error('Failed to create story:', error)
@@ -251,6 +291,7 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
             {streamingStory}
           </div>
         )}
+        
         
         <div ref={messagesEndRef} />
       </div>

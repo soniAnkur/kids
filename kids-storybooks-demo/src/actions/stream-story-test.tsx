@@ -22,7 +22,7 @@ function StoryCard({ story }: { story: Story }) {
           <h3 className="font-semibold text-lg text-foreground mb-2">{story.title}</h3>
           <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
             <span>{story.content.length} pages</span>
-            <span>{story.metadata.estimatedReadTime} min read</span>
+            <span>{story.estimatedReadTime} min read</span>
             <span className="capitalize">{story.theme}</span>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -85,32 +85,32 @@ export async function generateTestStory(request: StoryRequest): Promise<ReactNod
         content: [
           {
             id: 'page-1',
+            pageNumber: 1,
             text: `Once upon a time, ${child.name} discovered a magical ${request.theme} world.`,
-            imageUrl: '/api/placeholder/story/default.jpg'
+            illustration: '/api/placeholder/story/default.jpg'
           },
           {
             id: 'page-2',
+            pageNumber: 2,
             text: `In this wonderful place, ${child.name} met friendly creatures and learned valuable lessons.`,
-            imageUrl: '/api/placeholder/story/default.jpg'
+            illustration: '/api/placeholder/story/default.jpg'
           },
           {
             id: 'page-3',
+            pageNumber: 3,
             text: `With courage and kindness, ${child.name} helped everyone and became a hero!`,
-            imageUrl: '/api/placeholder/story/default.jpg'
+            illustration: '/api/placeholder/story/default.jpg'
           }
         ],
-        coverImageUrl: '/api/placeholder/story/cover.jpg',
+        coverImage: '/api/placeholder/story/cover.jpg',
         theme: request.theme,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        status: 'completed' as const,
-        metadata: {
-          estimatedReadTime: 3,
-          educationalObjectives: ['Courage', 'Kindness'],
-          moralLessons: ['Helping Others', 'Being Brave'],
-          customPrompt: request.customPrompt,
-          preferredLength: request.preferredLength || 'medium'
-        }
+        generatedAt: new Date(),
+        readCount: 0,
+        isFavorite: false,
+        status: 'ready' as const,
+        estimatedReadTime: 3,
+        educationalObjectives: ['Courage', 'Kindness'],
+        moralLessons: ['Helping Others', 'Being Brave']
       }
 
       console.log('TEST story created:', testStory.id)

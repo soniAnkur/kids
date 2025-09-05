@@ -313,10 +313,10 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
             {message.metadata?.component === 'story-preview' && message.metadata?.data && (
               <div className="mt-4 ml-8 mr-16">
                 <StoryPreview
-                  story={message.metadata.data}
+                  story={message.metadata?.data}
                   onStartNewStory={handleStartNewStory}
                   onReadStory={() => {
-                    setGeneratedStory(message.metadata.data)
+                    setGeneratedStory(message.metadata?.data)
                     setShowStoryReader(true)
                   }}
                 />

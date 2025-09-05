@@ -16,7 +16,7 @@ function StoryGenerationPlaceholder({ childName, theme }: { childName: string; t
         <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
           <div className="w-3 h-3 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
         </div>
-        <span className="font-medium text-foreground">Creating {childName}'s magical story...</span>
+        <span className="font-medium text-foreground">Creating {childName}&apos;s magical story...</span>
       </div>
       
       <div className="space-y-3">
@@ -75,7 +75,7 @@ export async function streamStoryGeneration(
           <span className="font-medium text-foreground">Almost ready! Creating illustrations...</span>
         </div>
         <div className="text-sm text-muted-foreground">
-          Story "{storyContent.title}" has been created with {storyContent.pages.length} magical pages
+          Story &quot;{storyContent.title}&quot; has been created with {storyContent.pages.length} magical pages
         </div>
       </div>
     )
@@ -89,22 +89,20 @@ export async function streamStoryGeneration(
       title: storyContent.title,
       childId: request.childId,
       content: storyContent.pages.map((page, index) => ({
-        id: `page-${index}`,
+        id: `page-${index + 1}`,
+        pageNumber: index + 1,
         text: page.text,
-        imageUrl: illustrations[index + 1] || '/api/placeholder/story/default.jpg'
+        illustration: illustrations[index + 1] || '/api/placeholder/story/default.jpg'
       })),
-      coverImageUrl: illustrations[0] || '/api/placeholder/story/cover.jpg',
+      coverImage: illustrations[0] || '/api/placeholder/story/cover.jpg',
       theme: request.theme,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: 'completed' as const,
-      metadata: {
-        estimatedReadTime: storyContent.estimatedReadTime,
-        educationalObjectives: storyContent.educationalObjectives,
-        moralLessons: storyContent.moralLessons,
-        customPrompt: request.customPrompt,
-        preferredLength: request.preferredLength || 'medium'
-      }
+      generatedAt: new Date(),
+      readCount: 0,
+      isFavorite: false,
+      status: 'ready' as const,
+      estimatedReadTime: storyContent.estimatedReadTime,
+      educationalObjectives: storyContent.educationalObjectives,
+      moralLessons: storyContent.moralLessons
     }
 
     // Notify parent component that story is ready
@@ -137,7 +135,7 @@ export async function streamStoryGeneration(
       <div className="border border-red-200 rounded-lg p-4 bg-red-50">
         <div className="text-red-600 font-medium">Story Generation Failed</div>
         <div className="text-red-500 text-sm mt-1">
-          Sorry, I couldn't create your story right now. Please try again.
+          Sorry, I couldn&apos;t create your story right now. Please try again.
         </div>
       </div>
     )
@@ -166,7 +164,7 @@ function StoryProgress({
         <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
           <div className="w-3 h-3 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
         </div>
-        <span className="font-medium text-foreground">Creating {childName}'s story...</span>
+        <span className="font-medium text-foreground">Creating {childName}&apos;s story...</span>
       </div>
       
       <div className="space-y-3">

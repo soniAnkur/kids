@@ -285,7 +285,7 @@ export async function generateStreamingStory(request: StoryRequest): Promise<Rea
       title: storyContent.title,
       childId: request.childId,
       theme: request.theme,
-      content: storyContent.pages.map((page, index) => ({
+      content: storyContent.pages.map((page: any, index: number) => ({
         id: `page-${index + 1}`,
         pageNumber: index + 1,
         text: page.text,

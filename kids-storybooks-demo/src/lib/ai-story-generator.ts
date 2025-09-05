@@ -78,13 +78,13 @@ export async function generateStoryOutline(request: StoryRequest): Promise<Story
     console.error('🔍 [OUTLINE] Story outline generation error:', error)
     
     // Check for specific API errors
-    if (error.status === 429) {
+    if ((error as any)?.status === 429) {
       console.error('🔍 [OUTLINE] Rate limit exceeded - too many requests')
-    } else if (error.status === 401) {
+    } else if ((error as any)?.status === 401) {
       console.error('🔍 [OUTLINE] Authentication failed - check API key')
-    } else if (error.status === 402) {
+    } else if ((error as any)?.status === 402) {
       console.error('🔍 [OUTLINE] Payment required - insufficient credits')
-    } else if (error.code === 'insufficient_quota') {
+    } else if ((error as any)?.code === 'insufficient_quota') {
       console.error('🔍 [OUTLINE] Insufficient quota - check OpenAI billing')
     }
     
@@ -147,13 +147,13 @@ export async function generateStoryContent(request: StoryRequest): Promise<Story
     console.error('📖 [STORY] Story generation error:', error)
     
     // Check for specific API errors
-    if (error.status === 429) {
+    if ((error as any)?.status === 429) {
       console.error('📖 [STORY] Rate limit exceeded - too many requests')
-    } else if (error.status === 401) {
+    } else if ((error as any)?.status === 401) {
       console.error('📖 [STORY] Authentication failed - check API key')
-    } else if (error.status === 402) {
+    } else if ((error as any)?.status === 402) {
       console.error('📖 [STORY] Payment required - insufficient credits')
-    } else if (error.code === 'insufficient_quota') {
+    } else if ((error as any)?.code === 'insufficient_quota') {
       console.error('📖 [STORY] Insufficient quota - check OpenAI billing')
     }
     

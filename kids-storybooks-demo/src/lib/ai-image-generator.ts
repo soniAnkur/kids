@@ -111,14 +111,14 @@ async function generateSingleImage(prompt: string, retryCount: number = 0): Prom
   } catch (error) {
     console.error('🖼️ [SINGLE_IMAGE] Single image generation error:', error)
     console.error('🖼️ [SINGLE_IMAGE] Error details:', {
-      name: error.name,
-      message: error.message,
-      status: error.status,
-      code: error.code
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      status: (error as any)?.status,
+      code: (error as any)?.code
     })
     
     // Handle content policy violations with safer retry
-    if (error.code === 'content_policy_violation' && retryCount < 2) {
+    if ((error as any)?.code === 'content_policy_violation' && retryCount < 2) {
       console.log(`🛡️ [SAFETY_RETRY] Content policy violation, attempting safer prompt (retry ${retryCount + 1}/2)`)
       
       // Generate a much safer, more generic prompt
@@ -129,15 +129,15 @@ async function generateSingleImage(prompt: string, retryCount: number = 0): Prom
     }
     
     // Check for other specific API errors
-    if (error.status === 429) {
+    if ((error as any)?.status === 429) {
       console.error('🖼️ [SINGLE_IMAGE] Rate limit exceeded - too many requests')
-    } else if (error.status === 401) {
+    } else if ((error as any)?.status === 401) {
       console.error('🖼️ [SINGLE_IMAGE] Authentication failed - check API key')
-    } else if (error.status === 402) {
+    } else if ((error as any)?.status === 402) {
       console.error('🖼️ [SINGLE_IMAGE] Payment required - insufficient credits')
-    } else if (error.code === 'insufficient_quota') {
+    } else if ((error as any)?.code === 'insufficient_quota') {
       console.error('🖼️ [SINGLE_IMAGE] Insufficient quota - check OpenAI billing')
-    } else if (error.code === 'content_policy_violation') {
+    } else if ((error as any)?.code === 'content_policy_violation') {
       console.error('🖼️ [SINGLE_IMAGE] Content policy violation - all retry attempts failed')
     }
     

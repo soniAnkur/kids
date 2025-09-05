@@ -169,6 +169,26 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
         setStreamingStory(streamedStory)
         setIsGenerating(false)
         console.log('CLIENT: Streaming story state updated')
+        
+        // Check for newly generated story after streaming completes
+        // Give it a moment for the story to be saved
+        setTimeout(async () => {
+          try {
+            const { getAllStories } = await import('@/actions/story-actions')
+            const allStories = await getAllStories()
+            const latestStory = allStories
+              .filter(story => story.childId === child.id)
+              .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0]
+            
+            if (latestStory) {
+              console.log('CLIENT: Found newly generated story, triggering event:', latestStory.title)
+              const { notifyStoryGenerated } = await import('@/lib/story-events')
+              notifyStoryGenerated(latestStory)
+            }
+          } catch (error) {
+            console.error('CLIENT: Failed to check for generated story:', error)
+          }
+        }, 1000)
       }
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -206,6 +226,26 @@ export function ChatInterface({ child, onBack, user }: ChatInterfaceProps) {
       setStreamingStory(streamedStory)
       setIsGenerating(false)
       console.log('CLIENT: Theme-based streaming story state updated')
+      
+      // Check for newly generated story after streaming completes
+      // Give it a moment for the story to be saved
+      setTimeout(async () => {
+        try {
+          const { getAllStories } = await import('@/actions/story-actions')
+          const allStories = await getAllStories()
+          const latestStory = allStories
+            .filter(story => story.childId === child.id)
+            .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0]
+          
+          if (latestStory) {
+            console.log('CLIENT: Found newly generated theme-based story, triggering event:', latestStory.title)
+            const { notifyStoryGenerated } = await import('@/lib/story-events')
+            notifyStoryGenerated(latestStory)
+          }
+        } catch (error) {
+          console.error('CLIENT: Failed to check for generated theme-based story:', error)
+        }
+      }, 1000)
       
     } catch (error) {
       console.error('Failed to create story:', error)

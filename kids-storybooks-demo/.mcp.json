@@ -1,0 +1,47 @@
+{
+  "mcpServers": {
+    "nextjs-demo-builder": {
+      "command": "node",
+      "args": ["/path/to/your/nextjs-demo-builder-agent.js"],
+      "env": {
+        "PROJECT_TYPE": "nextjs-kids-storybooks",
+        "FRAMEWORK": "Next.js 14",
+        "STYLING": "Tailwind CSS + shadcn/ui",
+        "AI_INTEGRATION": "OpenAI"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "npm run build",
+        "npm run dev", 
+        "npm run lint"
+      ]
+    }
+  },
+  "agentPreferences": {
+    "defaultAgent": "general-purpose",
+    "taskMappings": {
+      "nextjs-development": "general-purpose",
+      "react-components": "general-purpose",
+      "ui-refactoring": "shadcn-refactor-engineer",
+      "typescript-implementation": "general-purpose",
+      "server-actions": "general-purpose",
+      "ai-integration": "general-purpose",
+      "demo-building": "general-purpose"
+    }
+  },
+  "projectContext": {
+    "name": "Kids Personalized Storybooks",
+    "type": "nextjs-ai-demo",
+    "framework": "Next.js 14 with TypeScript",
+    "styling": "Tailwind CSS + shadcn/ui components",
+    "aiFeatures": ["OpenAI GPT-4 chat", "DALL-E image generation", "Story personalization"],
+    "architecture": "Server Actions + Client Components",
+    "guidelines": [
+      "Use server actions for all data operations",
+      "Implement proper loading states",
+      "Follow shadcn/ui patterns",
+      "Ensure child-safe content",
+      "Maintain responsive design"
+    ]
+  }
+}

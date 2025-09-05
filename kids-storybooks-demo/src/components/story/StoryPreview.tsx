@@ -41,7 +41,7 @@ export function StoryPreview({ story, onStartNewStory, onReadStory }: StoryPrevi
             <Clock className="w-4 h-4 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Reading time</p>
-              <p className="font-medium text-foreground">{story.estimatedReadTime} min</p>
+              <p className="font-medium text-foreground">{story.estimatedReadTime || 5} min</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -60,7 +60,7 @@ export function StoryPreview({ story, onStartNewStory, onReadStory }: StoryPrevi
             <p className="text-sm font-medium text-foreground">Learning objectives</p>
           </div>
           <div className="space-y-1">
-            {story.educationalObjectives.slice(0, 3).map((objective, index) => (
+            {story.educationalObjectives?.slice(0, 3).map((objective, index) => (
               <Badge 
                 key={index}
                 variant="secondary"
@@ -68,7 +68,11 @@ export function StoryPreview({ story, onStartNewStory, onReadStory }: StoryPrevi
               >
                 {objective}
               </Badge>
-            ))}
+            )) || (
+              <Badge variant="secondary" className="text-xs mr-1 mb-1">
+                Creative storytelling
+              </Badge>
+            )}
           </div>
         </div>
         

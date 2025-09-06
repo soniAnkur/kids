@@ -42,7 +42,7 @@ export async function generateStoryOutline(request: StoryRequest): Promise<Story
     const systemPrompt = buildOutlineSystemPrompt(child, request)
     console.log('🔍 [OUTLINE] System prompt length:', systemPrompt.length)
     
-    const userPrompt = `Create a ${request.preferredLength || 'medium'} ${request.theme} story outline for ${child.name}. ${request.customPrompt ? `Additional requirements: ${request.customPrompt}` : ''}`
+    const userPrompt = `Create a ${request.preferredLength || 'medium'} ${request.theme} story outline for ${child.name}.${request.customPrompt ? ` User-specified requirements: ${request.customPrompt}` : ''}`
     console.log('🔍 [OUTLINE] User prompt:', userPrompt)
     
     console.log('🔍 [OUTLINE] Calling OpenAI API...')
@@ -111,7 +111,7 @@ export async function generateStoryContent(request: StoryRequest): Promise<Story
     const systemPrompt = buildStorySystemPrompt(child, request)
     console.log('📖 [STORY] System prompt length:', systemPrompt.length)
     
-    const userPrompt = `Create a ${request.preferredLength || 'medium'} ${request.theme} story for ${child.name}. ${request.customPrompt ? `Additional requirements: ${request.customPrompt}` : ''}`
+    const userPrompt = `Create a ${request.preferredLength || 'medium'} ${request.theme} story for ${child.name}.${request.customPrompt ? ` User-specified requirements: ${request.customPrompt}` : ''}`
     console.log('📖 [STORY] User prompt:', userPrompt)
     
     console.log('📖 [STORY] Calling OpenAI API...')
@@ -167,6 +167,12 @@ function buildStorySystemPrompt(child: Child, request: StoryRequest): string {
   const personalityTraits = child.personality.map(p => p.name).join(', ')
   const interests = child.interests.map(i => i.name).join(', ')
   
+  // Parse custom prompt for specific requirements
+  const customRequirements = request.customPrompt ? `\n\nSpecific User Requirements:
+${request.customPrompt}
+
+IMPORTANT: Make sure to incorporate ALL of these specific requirements into the story. If characters are mentioned, include them as active participants in the adventure. If relationships are specified, make sure those relationships are central to the story. If specific elements or settings are mentioned, weave them naturally into the narrative.` : ''
+  
   return `You are a professional children's story writer creating personalized stories. 
 
 Child Information:
@@ -186,15 +192,15 @@ Story Requirements:
 - Safe, encouraging content
 - IMPORTANT: All scene descriptions must use only positive, child-friendly language suitable for AI image generation
 - Avoid any words that could be misinterpreted as violent, scary, or inappropriate
-- Focus on friendship, discovery, joy, and wonder
+- Focus on friendship, discovery, joy, and wonder${customRequirements}
 
 Format your response as JSON:
 {
-  "title": "Story title featuring the child's name",
+  "title": "Story title featuring the child's name and specific elements mentioned",
   "pages": [
     {
-      "text": "Page text (2-3 sentences for young children, 3-4 for older)",
-      "sceneDescription": "Detailed description of the scene for illustration generation"
+      "text": "Page text (2-3 sentences for young children, 3-4 for older) that incorporates the user's specific requirements",
+      "sceneDescription": "Detailed description of the scene for illustration generation including any specific characters, settings, or elements mentioned by the user"
     }
   ],
   "estimatedReadTime": 5,
@@ -202,7 +208,7 @@ Format your response as JSON:
   "moralLessons": ["lesson1", "lesson2"]
 }
 
-Create ${getPageCount(request.preferredLength || 'medium')} pages. Make it magical and engaging!`
+Create ${getPageCount(request.preferredLength || 'medium')} pages. Make it magical and engaging while ensuring ALL user-specified requirements are woven naturally throughout the story!`
 }
 
 function getPageCount(length: string): number {
@@ -261,6 +267,12 @@ function buildOutlineSystemPrompt(child: Child, request: StoryRequest): string {
   const personalityTraits = child.personality.map(p => p.name).join(', ')
   const interests = child.interests.map(i => i.name).join(', ')
   
+  // Parse custom prompt for specific requirements
+  const customRequirements = request.customPrompt ? `\n\nSpecific User Requirements:
+${request.customPrompt}
+
+IMPORTANT: Make sure to incorporate ALL of these specific requirements into the story outline. If characters are mentioned, include them as active participants. If relationships are specified, make sure those relationships are central to the story structure. If specific elements or settings are mentioned, weave them naturally into the outline.` : ''
+  
   return `You are a professional children's story writer creating story outlines. 
 
 Child Information:
@@ -277,19 +289,19 @@ Story Requirements:
 - Include elements from their interests where relevant
 - IMPORTANT: All scene descriptions must use only positive, child-friendly language suitable for AI image generation
 - Avoid any words that could be misinterpreted as violent, scary, or inappropriate
-- Focus on friendship, discovery, joy, and wonder
+- Focus on friendship, discovery, joy, and wonder${customRequirements}
 
 Create a story outline with ${getPageCount(request.preferredLength || 'medium')} pages.
 
 Format your response as JSON:
 {
-  "title": "Story title featuring the child's name",
-  "summary": "Brief story summary (2-3 sentences)",
+  "title": "Story title featuring the child's name and incorporating user-specified elements",
+  "summary": "Brief story summary (2-3 sentences) that includes the specific characters, relationships, and elements mentioned by the user",
   "pages": [
     {
       "pageNumber": 1,
-      "sceneDescription": "Detailed scene description for illustrations",
-      "keyElements": ["element1", "element2"]
+      "sceneDescription": "Detailed scene description for illustrations that incorporates any specific characters, settings, or elements mentioned by the user",
+      "keyElements": ["element1", "element2", "user-specified elements"]
     }
   ],
   "theme": "${request.theme}",

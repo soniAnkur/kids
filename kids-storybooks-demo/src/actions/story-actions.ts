@@ -3,6 +3,7 @@
 import { Story, StoryRequest, GenerationProgress } from '@/types'
 import { generateStoryContent } from '@/lib/ai-story-generator'
 import { generateStoryIllustrations } from '@/lib/ai-image-generator'
+import { getChildren } from './child-actions'
 
 // In-memory storage for generated stories (for demo purposes)
 // Clear on server restart to avoid stale data
@@ -62,11 +63,20 @@ async function generateStoryInBackground(storyId: string, request: StoryRequest)
     // In a real app, save initial story record with 'generating' status
     console.log(`Starting story generation for ${storyId}`)
     
+    // Get child information for context
+    const children = await getChildren()
+    const child = children.find(c => c.id === request.childId)
+    
     // Generate story content using AI
     const content = await generateStoryContent(request)
     
-    // Generate illustrations using AI
-    const illustrations = await generateStoryIllustrations(content, request)
+    // Generate illustrations using AI with child context
+    const illustrations = await generateStoryIllustrations(
+      content, 
+      request, 
+      child?.name, 
+      child?.age
+    )
     
     // Combine content with illustrations
     const story: Story = {

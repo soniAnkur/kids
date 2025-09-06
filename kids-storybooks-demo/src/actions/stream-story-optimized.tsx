@@ -255,7 +255,7 @@ export async function generateStreamingStory(request: StoryRequest): Promise<Rea
       }
       
       illustrations = await Promise.race([
-        generateStoryIllustrations(simpleOutline, request),
+        generateStoryIllustrations(simpleOutline, request, child.name, child.age),
         new Promise<string[]>((_, reject) => setTimeout(() => reject(new Error('Image generation timeout')), 120000)) // 2 minute timeout
       ])
       console.log('🎨 [IMAGES] Images completed successfully:', illustrations.length)

@@ -138,7 +138,7 @@ export async function generateStreamingStory(request: StoryRequest): Promise<Rea
       setTimeout(async () => {
         try {
           console.log('Starting illustration generation in background...')
-          const illustrations = await generateStoryIllustrations(storyContent, request)
+          const illustrations = await generateStoryIllustrations(storyContent, request, child.name, child.age)
           console.log('Background illustrations generated:', illustrations.length)
           // Note: In a real app, you'd save these to database and update the UI
         } catch (error) {

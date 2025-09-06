@@ -27,22 +27,39 @@ interface StoryRequest {
   preferredLength: 'short' | 'medium' | 'long'
 }
 
+interface ImageGenerationContext {
+  childName: string
+  childAge: number
+  theme: string
+  customPrompt?: string
+  extractedCharacters?: string[]
+  extractedRelationships?: string[]
+  extractedSettings?: string
+}
+
 export async function generateStoryIllustrations(
   content: StoryContent | StoryOutline,
-  request: StoryRequest
+  request: StoryRequest,
+  childName?: string,
+  childAge?: number
 ): Promise<string[]> {
   try {
     console.log('🎨 [IMAGES] Starting story illustration generation...')
     console.log('🎨 [IMAGES] Content title:', content.title)
     console.log('🎨 [IMAGES] Page count:', content.pages.length)
     console.log('🎨 [IMAGES] Theme:', request.theme)
+    console.log('🎨 [IMAGES] Custom prompt:', request.customPrompt)
+    
+    // Build image generation context from the custom prompt and request
+    const imageContext = buildImageGenerationContext(request, childName, childAge)
+    console.log('🎨 [IMAGES] Image context:', imageContext)
     
     const illustrations: string[] = []
     const startTime = Date.now()
     
     // Generate cover image first
     console.log('🎨 [IMAGES] Generating cover image...')
-    const coverPrompt = buildCoverImagePrompt(content.title, request.theme)
+    const coverPrompt = buildCoverImagePrompt(content.title, imageContext)
     console.log('🎨 [IMAGES] Cover prompt:', coverPrompt)
     
     const coverStartTime = Date.now()
@@ -56,7 +73,7 @@ export async function generateStoryIllustrations(
     for (let i = 0; i < content.pages.length; i++) {
       const page = content.pages[i]
       const sceneDescription = 'text' in page ? page.sceneDescription : page.sceneDescription
-      const pagePrompt = buildPageImagePrompt(sceneDescription, request.theme)
+      const pagePrompt = buildPageImagePrompt(sceneDescription, imageContext)
       console.log(`🎨 [IMAGES] Page ${i + 1} prompt:`, pagePrompt)
       
       const pageStartTime = Date.now()
@@ -164,23 +181,114 @@ function generateSaferFallbackPrompt(originalPrompt: string): string {
   return safePrompt
 }
 
-function buildCoverImagePrompt(title: string, theme: string): string {
+function buildImageGenerationContext(request: StoryRequest, childName?: string, childAge?: number): ImageGenerationContext {
+  const context: ImageGenerationContext = {
+    childName: childName || 'child',
+    childAge: childAge || 6,
+    theme: request.theme,
+    customPrompt: request.customPrompt
+  }
+  
+  // Extract specific elements from customPrompt if available
+  if (request.customPrompt) {
+    const customPrompt = request.customPrompt.toLowerCase()
+    
+    // Extract characters mentioned
+    const characters: string[] = []
+    if (customPrompt.includes('mom') || customPrompt.includes('mother')) characters.push('mom')
+    if (customPrompt.includes('dad') || customPrompt.includes('father')) characters.push('dad')
+    if (customPrompt.includes('sister')) characters.push('sister')
+    if (customPrompt.includes('brother')) characters.push('brother')
+    if (customPrompt.includes('friend')) characters.push('friend')
+    if (customPrompt.includes('grandma') || customPrompt.includes('grandmother')) characters.push('grandma')
+    if (customPrompt.includes('grandpa') || customPrompt.includes('grandfather')) characters.push('grandpa')
+    
+    // Extract character names (simple pattern matching)
+    const nameMatches = request.customPrompt.match(/\b[A-Z][a-z]+\b/g)
+    if (nameMatches) {
+      const commonNames = nameMatches.filter(name => 
+        !['The', 'A', 'An', 'Include', 'Story', 'Adventure', 'Magic', 'Magical'].includes(name)
+      )
+      characters.push(...commonNames)
+    }
+    
+    // Extract relationships
+    const relationships: string[] = []
+    if (customPrompt.includes('with mom')) relationships.push('with mom')
+    if (customPrompt.includes('with dad')) relationships.push('with dad')
+    if (customPrompt.includes('with sister')) relationships.push('with sister')
+    if (customPrompt.includes('with brother')) relationships.push('with brother')
+    if (customPrompt.includes('with friends')) relationships.push('with friends')
+    
+    // Extract settings
+    let setting = ''
+    if (customPrompt.includes('at the beach')) setting = 'at the beach'
+    else if (customPrompt.includes('in the forest')) setting = 'in the forest'  
+    else if (customPrompt.includes('in space')) setting = 'in space'
+    else if (customPrompt.includes('at home')) setting = 'at home'
+    else if (customPrompt.includes('in the backyard')) setting = 'in the backyard'
+    else if (customPrompt.includes('at school')) setting = 'at school'
+    else if (customPrompt.includes('in the ocean')) setting = 'in the ocean'
+    
+    context.extractedCharacters = characters
+    context.extractedRelationships = relationships
+    context.extractedSettings = setting
+  }
+  
+  return context
+}
+
+function buildCoverImagePrompt(title: string, context: ImageGenerationContext): string {
   const baseStyle = "Children's book illustration style, vibrant colors, friendly and magical atmosphere, safe for children"
   
   // Sanitize the title to remove potentially problematic words
   const safeTitle = sanitizeSceneDescription(title)
   
-  return `${baseStyle}. Create a cover illustration for a ${theme} themed children's story. The image should be inviting and exciting, showing cheerful characters in a magical ${theme} world. Include whimsical details that would appeal to children aged 4-10. Bright, colorful, positive atmosphere. No text or words in the image.`
+  let prompt = `${baseStyle}. Create a cover illustration for a ${context.theme} themed children's story`
+  
+  // Add character context
+  if (context.extractedCharacters && context.extractedCharacters.length > 0) {
+    const characterList = context.extractedCharacters.join(', ')
+    prompt += ` featuring ${context.childName} with ${characterList}`
+  } else {
+    prompt += ` featuring ${context.childName}`
+  }
+  
+  // Add setting context  
+  if (context.extractedSettings) {
+    prompt += ` ${context.extractedSettings}`
+  }
+  
+  prompt += `. The image should be inviting and exciting, showing cheerful characters in a magical ${context.theme} world. Include whimsical details that would appeal to children aged ${context.childAge}-${context.childAge + 4}. Bright, colorful, positive atmosphere. No text or words in the image.`
+  
+  return prompt
 }
 
-function buildPageImagePrompt(sceneDescription: string, theme: string): string {
+function buildPageImagePrompt(sceneDescription: string, context: ImageGenerationContext): string {
   const baseStyle = "Children's book illustration style, vibrant colors, friendly characters, magical atmosphere"
   const safetyGuidelines = "safe for children, no scary or frightening elements, positive and uplifting tone"
   
   // Clean and sanitize the scene description for DALL-E safety
-  const cleanDescription = sanitizeSceneDescription(sceneDescription)
+  let cleanDescription = sanitizeSceneDescription(sceneDescription)
   
-  return `${baseStyle}. Create an illustration showing: ${cleanDescription}. This is for a ${theme} themed children's story. ${safetyGuidelines}. The style should be consistent with modern children's book illustrations, with warm lighting and inviting composition. No text or words in the image.`
+  // Enhance scene description with user-specified context
+  if (context.extractedCharacters && context.extractedCharacters.length > 0) {
+    const characterMentions = context.extractedCharacters.join(', ')
+    cleanDescription += `. Include ${context.childName} along with ${characterMentions} as characters in this scene`
+  }
+  
+  if (context.extractedSettings && !cleanDescription.toLowerCase().includes(context.extractedSettings.toLowerCase())) {
+    cleanDescription += `. The scene takes place ${context.extractedSettings}`
+  }
+  
+  let prompt = `${baseStyle}. Create an illustration showing: ${cleanDescription}. This is for a ${context.theme} themed children's story`
+  
+  // Add age-appropriate guidance
+  prompt += ` suitable for ${context.childAge} year old children`
+  
+  prompt += `. ${safetyGuidelines}. The style should be consistent with modern children's book illustrations, with warm lighting and inviting composition. No text or words in the image.`
+  
+  return prompt
 }
 
 function sanitizeSceneDescription(description: string): string {

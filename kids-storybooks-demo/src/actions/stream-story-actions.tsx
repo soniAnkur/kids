@@ -81,7 +81,7 @@ export async function streamStoryGeneration(
     )
 
     // Generate illustrations
-    const illustrations = await generateStoryIllustrations(storyContent, request)
+    const illustrations = await generateStoryIllustrations(storyContent, request, child.name, child.age)
 
     // Create complete story object
     const story: Story = {
